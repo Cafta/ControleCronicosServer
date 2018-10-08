@@ -19,6 +19,7 @@ public class Servidor_main {
 	static Set<Integer> portasLivres;
 	
 	public static void main(String[] args) {
+		
 		int porta = 0;
 		ExecutorService executorService = Executors.newWorkStealingPool();
 		portasLivres = new HashSet<Integer>();

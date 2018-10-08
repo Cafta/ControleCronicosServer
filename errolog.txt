@@ -1,0 +1,48 @@
+2018-10-08T07:12:14.259
+Erro em Login.log(login,pwd)
+java.lang.ClassCastException: java.lang.Integer cannot be cast to java.lang.Long
+	at org.bson.Document.getLong(Document.java:192)
+	at com.drcarlosamaral.controlecronicosserver.Login.log(Login.java:49)
+	at com.drcarlosamaral.controlecronicosserver.Coneccao.run(Coneccao.java:45)
+	at java.util.concurrent.ForkJoinTask$RunnableExecuteAction.exec(Unknown Source)
+	at java.util.concurrent.ForkJoinTask.doExec(Unknown Source)
+	at java.util.concurrent.ForkJoinPool$WorkQueue.runTask(Unknown Source)
+	at java.util.concurrent.ForkJoinPool.runWorker(Unknown Source)
+	at java.util.concurrent.ForkJoinWorkerThread.run(Unknown Source)
+
+2018-10-08T07:12:15.233
+Erro em Login.log(login,pwd)
+java.lang.ClassCastException: java.lang.Integer cannot be cast to java.lang.Long
+	at org.bson.Document.getLong(Document.java:192)
+	at com.drcarlosamaral.controlecronicosserver.Login.log(Login.java:49)
+	at com.drcarlosamaral.controlecronicosserver.Coneccao.run(Coneccao.java:45)
+	at java.util.concurrent.ForkJoinTask$RunnableExecuteAction.exec(Unknown Source)
+	at java.util.concurrent.ForkJoinTask.doExec(Unknown Source)
+	at java.util.concurrent.ForkJoinPool$WorkQueue.runTask(Unknown Source)
+	at java.util.concurrent.ForkJoinPool.runWorker(Unknown Source)
+	at java.util.concurrent.ForkJoinWorkerThread.run(Unknown Source)
+
+2018-10-08T07:23:00.438
+Erro em Login.log(login,pwd)
+java.lang.ClassCastException: java.lang.Integer cannot be cast to java.lang.Long
+	at org.bson.Document.getLong(Document.java:192)
+	at com.drcarlosamaral.controlecronicosserver.Login.log(Login.java:49)
+	at com.drcarlosamaral.controlecronicosserver.Coneccao.run(Coneccao.java:45)
+	at java.util.concurrent.ForkJoinTask$RunnableExecuteAction.exec(Unknown Source)
+	at java.util.concurrent.ForkJoinTask.doExec(Unknown Source)
+	at java.util.concurrent.ForkJoinPool$WorkQueue.runTask(Unknown Source)
+	at java.util.concurrent.ForkJoinPool.runWorker(Unknown Source)
+	at java.util.concurrent.ForkJoinWorkerThread.run(Unknown Source)
+
+2018-10-08T07:23:01.127
+Erro em Login.log(login,pwd)
+java.lang.ClassCastException: java.lang.Integer cannot be cast to java.lang.Long
+	at org.bson.Document.getLong(Document.java:192)
+	at com.drcarlosamaral.controlecronicosserver.Login.log(Login.java:49)
+	at com.drcarlosamaral.controlecronicosserver.Coneccao.run(Coneccao.java:45)
+	at java.util.concurrent.ForkJoinTask$RunnableExecuteAction.exec(Unknown Source)
+	at java.util.concurrent.ForkJoinTask.doExec(Unknown Source)
+	at java.util.concurrent.ForkJoinPool$WorkQueue.runTask(Unknown Source)
+	at java.util.concurrent.ForkJoinPool.runWorker(Unknown Source)
+	at java.util.concurrent.ForkJoinWorkerThread.run(Unknown Source)
+

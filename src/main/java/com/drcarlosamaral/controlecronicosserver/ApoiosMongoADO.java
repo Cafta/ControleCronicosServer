@@ -36,7 +36,7 @@ import javafx.scene.control.ButtonType;
  * @author Carlos Amaral
  */
 public class ApoiosMongoADO {
-    
+	
     public ApoiosMongoADO(){ 
         // Se o arquivo de configuração não existir vou mostrar uma primeira mensagem antes de mandar configurar
         // pois o usuário pode não entender de como configurar e preferir encerrar o programa.
@@ -82,7 +82,7 @@ public class ApoiosMongoADO {
 //        try {
 //	        MongoClientURI connectionString = new MongoClientURI(Login.getURL());
 //	        try (MongoClient mongoClient = new MongoClient(connectionString)){
-//	            MongoDatabase database = mongoClient.getDatabase("ControleNovaAmerica");
+//	            MongoDatabase database = mongoClient.getDatabase(Login.bd);
 //	            MongoCollection<Document> collection = database.getCollection("ListaDeBairros");
 //	            Document documento = collection.find().first();
 //	            //se n�o deu erro � porque conectou
@@ -160,7 +160,7 @@ public class ApoiosMongoADO {
     public static String getVersion() {
     	MongoClientURI connectionString = new MongoClientURI(Login.getURL());
     	try (MongoClient mongoClient = new MongoClient(connectionString)){
-    		MongoDatabase mongoDB = mongoClient.getDatabase("ControleNovaAmerica");
+    		MongoDatabase mongoDB = mongoClient.getDatabase(Login.bd);
     		MongoCollection<Document> collection = mongoDB.getCollection("login");
     		Document doc = collection.find(exists("versao")).first();
     		if (doc != null && !doc.isEmpty()) {
@@ -183,7 +183,7 @@ public class ApoiosMongoADO {
 			//agora vou ter que achar o usuario com esse login e password no BD
 			MongoClientURI connectionString = new MongoClientURI(Login.getURL());
 	    	try (MongoClient mongoClient = new MongoClient(connectionString)){
-	    		MongoDatabase mongoDB = mongoClient.getDatabase("ControleNovaAmerica");
+	    		MongoDatabase mongoDB = mongoClient.getDatabase(Login.bd);
 	    		MongoCollection<Document> collection = mongoDB.getCollection("login");
 	    		Document doc = collection.find(and(eq("login",login),eq("pwd", pwd))).first();
 	    		if (doc != null && !doc.isEmpty()) {
@@ -206,7 +206,7 @@ public class ApoiosMongoADO {
     	List<Document> lista = new ArrayList<>();
     	MongoClientURI connectionString = new MongoClientURI(Login.getURL());
     	try (MongoClient mongoClient = new MongoClient(connectionString)){
-    		MongoDatabase mongoDB = mongoClient.getDatabase("ControleNovaAmerica");
+    		MongoDatabase mongoDB = mongoClient.getDatabase(Login.bd);
     		MongoCollection<Document> collection = mongoDB.getCollection("Pessoas");
     		MongoCursor<Document> cursor = collection.find(or(eq("posto","NovaAmerica"),not(exists("posto"))))
     										.projection(eq("name",1))
@@ -249,7 +249,7 @@ public class ApoiosMongoADO {
 //            if (rua == null || rua.length == 0) return;
 //            MongoClientURI connectionString = new MongoClientURI(URL);
 //            try (MongoClient mongoClient = new MongoClient(connectionString)){
-//                MongoDatabase database = mongoClient.getDatabase("ControleNovaAmerica");
+//                MongoDatabase database = mongoClient.getDatabase(Login.bd);
 //                MongoCollection<Document> collection = database.getCollection("ListaDeRuas");
 //                Document doc = new Document();
 //                for (String r : rua){
@@ -267,7 +267,7 @@ public class ApoiosMongoADO {
 //            if (ruas == null || ruas.length == 0) return;
 //            MongoClientURI connectionString = new MongoClientURI(URL);
 //            try (MongoClient mongoClient = new MongoClient(connectionString)){
-//            	MongoDatabase database = mongoClient.getDatabase("ControleNovaAmerica");
+//            	MongoDatabase database = mongoClient.getDatabase(Login.bd);
 //            	MongoCollection<Document> collection = database.getCollection("ListaDeRuas");
 //            	for (String r : ruas) {
 //            		Document doc = new Document();
@@ -285,7 +285,7 @@ public class ApoiosMongoADO {
             if (document == null || document.isEmpty()) return false;
             MongoClientURI connectionString = new MongoClientURI(Login.getURL());
             try(MongoClient mongoClient = new MongoClient(connectionString)){
-            	MongoDatabase database = mongoClient.getDatabase("ControleNovaAmerica");
+            	MongoDatabase database = mongoClient.getDatabase(Login.bd);
             	MongoCollection<Document> collection = database.getCollection("ArquivoMorto");
             	collection.insertOne(document);
             }
@@ -329,7 +329,7 @@ public class ApoiosMongoADO {
     	try {
     		MongoClientURI connectionString = new MongoClientURI(Login.getURL());
     		try(MongoClient mongoClient = new MongoClient(connectionString)){
-    			MongoDatabase mongoDB = mongoClient.getDatabase("ControleNovaAmerica");
+    			MongoDatabase mongoDB = mongoClient.getDatabase(Login.bd);
     			MongoCollection<Document> collection = mongoDB.getCollection("login");
     			Document doc = new Document();
     			doc.append("versao", Login.VERSAO);
