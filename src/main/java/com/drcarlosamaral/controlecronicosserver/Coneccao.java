@@ -1,5 +1,6 @@
 package com.drcarlosamaral.controlecronicosserver;
 
+import java.io.EOFException;
 import java.io.InputStream;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
@@ -48,7 +49,6 @@ public class Coneccao implements Runnable{
 				oos.writeObject("Login e Senha não combinam.");
 				msg = null;
 			} else {
-				System.out.println("Coneccao: Login ok");
 				oos.writeObject("OK");
 			}
 			
@@ -73,21 +73,6 @@ public class Coneccao implements Runnable{
 				} else {
 					msg = null;
 				}
-//				else if (msg != null && msg.equals("GETSTRING")) {
-//					int nGet = Integer.parseInt((String) ois.readObject());
-//					for (int i = 0; i < nGet; i++) {
-//						msg = (String) ois.readObject();
-//						String retorno = ApoiosMongoADO.getString(msg);
-//						oos.writeObject(retorno);
-//					}
-//				} else if (msg != null && msg.equals("GETOBJ")) {
-//					int nGet = Integer.parseInt((String) ois.readObject());
-//					for (int i = 0; i < nGet; i++) {
-//						msg = (String) ois.readObject();
-//						Document retorno = ApoiosMongoADO.pegaDoc();
-//						oos.writeObject(retorno); 
-//					}
-//				}
 			}
 			Servidor_main.liberadaPorta(porta);
 			System.out.println("Coneccao: Porta " + porta + " liberada");

@@ -18,7 +18,8 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.bson.Document; 
+import org.bson.Document;
+import org.bson.types.ObjectId;
 
 import com.mongodb.MongoClient;
 import com.mongodb.MongoClientURI;
@@ -152,12 +153,60 @@ public class ApoiosMongoADO {
     		return getListaPessoas();
     	} else if (msg.equals("usuario")) {
     		return getDadosUsuario(oos, ois);
+    	} else if (msg.equals("pessoa")) {
+    		return getPessoa(oos,ois);
     	} else {
     		return new Document();
     	}
     }
     
-    public static String getVersion() {
+    private static Document getPessoa(ObjectOutputStream oos, ObjectInputStream ois) {
+    	Document doc = new Document();
+    	// vai passar o que?
+    	try {
+			String resposta = (String) ois.readObject();
+			if (resposta.equals("ObjectId")) {
+				ObjectId oId = (ObjectId) ois.readObject();
+				return getPessoa(oId);
+			} else if (resposta.equals("nome")) {
+				List<Document> docs = getPessoa((String) ois.readObject());
+				oos.writeObject(docs);
+				return new Document();
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+    	return doc;
+    }
+    
+    private static List<Document> getPessoa(String nome) {
+    	List<Document> pessoas = new ArrayList<>();
+    	MongoClientURI connectionString = new MongoClientURI(Login.getURL());
+    	try (MongoClient mongoClient = new MongoClient(connectionString)){
+    		MongoDatabase mongoDB = mongoClient.getDatabase(Login.bd);
+    		MongoCollection<Document> collection = mongoDB.getCollection("Pessoas");
+    		MongoCursor<Document> cursor = collection.find(eq("name", nome)).iterator();
+    		cursor.forEachRemaining(d -> pessoas.add(d));
+    	} catch (Exception e){
+    		arquivaErro("Erro em ApoiosMongoADO.getPessoa(_id)", e);
+    	}
+    	return pessoas;
+    }
+    
+    private static Document getPessoa(ObjectId _id) {
+    	Document doc = new Document();
+    	MongoClientURI connectionString = new MongoClientURI(Login.getURL());
+    	try (MongoClient mongoClient = new MongoClient(connectionString)){
+    		MongoDatabase mongoDB = mongoClient.getDatabase(Login.bd);
+    		MongoCollection<Document> collection = mongoDB.getCollection("Pessoas");
+    		doc = collection.find(eq("_id", _id)).first();
+    	} catch (Exception e){
+    		arquivaErro("Erro em ApoiosMongoADO.getPessoa(_id)", e);
+    	}
+    	return doc;
+    }
+    
+    private static String getVersion() {
     	MongoClientURI connectionString = new MongoClientURI(Login.getURL());
     	try (MongoClient mongoClient = new MongoClient(connectionString)){
     		MongoDatabase mongoDB = mongoClient.getDatabase(Login.bd);
