@@ -25,7 +25,7 @@ import org.bson.Document;
 public class Login {
     private static String name;
     private static String URL = "mongodb://usuario:xyz123@localhost:27017";
-    public static final String bd = "ControleNovaAmerica"; //"ControleCronicosBD";
+    public static final String bd = "ControleCronicosBD2";//"ControleCronicosBD2";//"ControleNovaAmerica"; //"ControleCronicosBD";
     public static final String VERSAO = "1.1.0 (void)";
     
     /**
@@ -44,7 +44,7 @@ public class Login {
         	MongoClientURI connectionString = new MongoClientURI(Login.getURL());
             try (MongoClient mongoClient = new MongoClient(connectionString)){
                 MongoDatabase mongoDB = mongoClient.getDatabase(Login.bd);
-                MongoCollection<Document> collection = mongoDB.getCollection("login");
+                MongoCollection<Document> collection = mongoDB.getCollection("Funcionarios");
                 Document pDoc = collection.find(eq("login", login)).first();
                 if (pDoc == null) return false;
                 if (Objects.equals(pDoc.getLong("pwd"), pwd)){
@@ -74,7 +74,7 @@ public class Login {
             if (userName != null && !userName.isEmpty()){
                 try (MongoClient mongoClient = new MongoClient(new MongoClientURI(URL))){
                     MongoDatabase mongoDB = mongoClient.getDatabase(Login.bd);
-                    MongoCollection<Document> collection = mongoDB.getCollection("login");
+                    MongoCollection<Document> collection = mongoDB.getCollection("Funcionarios");
                     collection.insertOne(new Document("nome", userName)
                             .append("login",userLog)
                             .append("pwd", userPwd));
@@ -92,7 +92,7 @@ public class Login {
             if (userLog != null && !userLog.isEmpty()){
                 try (MongoClient mongoClient = new MongoClient(new MongoClientURI(URL))){
                     MongoDatabase mongoDB = mongoClient.getDatabase(Login.bd);
-                    MongoCollection<Document> collection = mongoDB.getCollection("login");
+                    MongoCollection<Document> collection = mongoDB.getCollection("Funcionarios");
                     Document doc = collection.findOneAndDelete(eq("login", userLog));
                     if (doc != null) return true;
                 } catch (Exception putz) {
@@ -107,7 +107,7 @@ public class Login {
         if (userLog != null && !userLog.isEmpty()){
             try (MongoClient mongoClient = new MongoClient(new MongoClientURI(URL))){
                 MongoDatabase mongoDB = mongoClient.getDatabase(Login.bd);
-                MongoCollection<Document> collection = mongoDB.getCollection("login");
+                MongoCollection<Document> collection = mongoDB.getCollection("Funcionarios");
                 Document doc = collection.find(eq("login", userLog)).first();
                 if (doc == null) {
                     return false;
@@ -131,7 +131,7 @@ public class Login {
         List<String> users = new ArrayList<>();
         try (MongoClient mongoClient = new MongoClient(new MongoClientURI(URL))){
                 MongoDatabase mongoDB = mongoClient.getDatabase(Login.bd);
-                MongoCollection<Document> collection = mongoDB.getCollection("login");
+                MongoCollection<Document> collection = mongoDB.getCollection("Funcionarios");
                 MongoCursor<Document> cursor = collection.find(exists("login")).iterator();
                 while (cursor.hasNext()){
                     users.add(cursor.next().getString("login"));

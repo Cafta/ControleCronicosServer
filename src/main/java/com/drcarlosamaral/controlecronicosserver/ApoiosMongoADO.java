@@ -147,15 +147,25 @@ public class ApoiosMongoADO {
 //    }
     
     public static Object get(String msg, ObjectOutputStream oos, ObjectInputStream ois) {
-    	if (msg.equals("versao")) {
-    		return getVersion();
-    	} else if (msg.equals("listaPessoas")) {
-    		return getListaPessoas();
-    	} else if (msg.equals("usuario")) {
-    		return getDadosUsuario(oos, ois);
-    	} else if (msg.equals("pessoa")) {
-    		return getPessoa(oos,ois);
-    	} else {
+    	try {
+	    	if (msg.equals("versao")) {
+	    		return getVersion();
+	    	} else if (msg.equals("listaPessoas")) {
+	    		return getListaPessoas();
+	    	} else if (msg.equals("listaReceitas")) {
+	    		ObjectId oId = (ObjectId) ois.readObject();
+	    		return getListaReceitas(oId);
+	    	} else if (msg.equals("usuario")) {
+	    		return getDadosUsuario(oos, ois);
+	    	} else if (msg.equals("pessoa")) {
+	    		return getPessoa(oos,ois);
+	    	} else if (msg.equals("paciente")) {
+	    		return getPaciente(oos,ois);
+	    	} else {
+	    		return new Document();
+	    	}
+    	} catch (Exception e) {
+    		e.printStackTrace();
     		return new Document();
     	}
     }
@@ -176,6 +186,34 @@ public class ApoiosMongoADO {
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
+    	return doc;
+    }
+    
+    private static Document getPaciente(ObjectOutputStream oos, ObjectInputStream ois) {
+    	Document doc = new Document();
+    	// vai passar o que?
+    	try {
+			String resposta = (String) ois.readObject();
+			if (resposta.equals("ObjectId")) {
+				ObjectId oId = (ObjectId) ois.readObject();
+				return getPaciente(oId);
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+    	return doc;
+    }
+    
+    private static Document getPaciente(ObjectId _id) {
+    	Document doc = new Document();
+    	MongoClientURI connectionString = new MongoClientURI(Login.getURL());
+    	try (MongoClient mongoClient = new MongoClient(connectionString)){
+    		MongoDatabase mongoDB = mongoClient.getDatabase(Login.bd);
+    		MongoCollection<Document> collection = mongoDB.getCollection("Pacientes");
+    		doc = collection.find(eq("_id", _id)).first();
+    	} catch (Exception e){
+    		arquivaErro("Erro em ApoiosMongoADO.getPacientes(_id)", e);
+    	}
     	return doc;
     }
     
@@ -210,7 +248,7 @@ public class ApoiosMongoADO {
     	MongoClientURI connectionString = new MongoClientURI(Login.getURL());
     	try (MongoClient mongoClient = new MongoClient(connectionString)){
     		MongoDatabase mongoDB = mongoClient.getDatabase(Login.bd);
-    		MongoCollection<Document> collection = mongoDB.getCollection("login");
+    		MongoCollection<Document> collection = mongoDB.getCollection("Funcionarios");
     		Document doc = collection.find(exists("versao")).first();
     		if (doc != null && !doc.isEmpty()) {
     			return doc.getString("versao");
@@ -233,7 +271,7 @@ public class ApoiosMongoADO {
 			MongoClientURI connectionString = new MongoClientURI(Login.getURL());
 	    	try (MongoClient mongoClient = new MongoClient(connectionString)){
 	    		MongoDatabase mongoDB = mongoClient.getDatabase(Login.bd);
-	    		MongoCollection<Document> collection = mongoDB.getCollection("login");
+	    		MongoCollection<Document> collection = mongoDB.getCollection("Funcionarios");
 	    		Document doc = collection.find(and(eq("login",login),eq("pwd", pwd))).first();
 	    		if (doc != null && !doc.isEmpty()) {
 	    			return doc;
@@ -259,6 +297,23 @@ public class ApoiosMongoADO {
     		MongoCollection<Document> collection = mongoDB.getCollection("Pessoas");
     		MongoCursor<Document> cursor = collection.find(or(eq("posto","NovaAmerica"),not(exists("posto"))))
     										.projection(eq("name",1))
+    										.iterator();
+    		while(cursor.hasNext()) {
+    			lista.add(cursor.next());
+    		}
+    	} catch (Exception e){
+    		arquivaErro("Erro em ApoiosMongoADO.getVersion()", e);
+    	}
+		return lista;
+    }
+    
+    private static List<Document> getListaReceitas(ObjectId _id){
+    	List<Document> lista = new ArrayList<>();
+    	MongoClientURI connectionString = new MongoClientURI(Login.getURL());
+    	try (MongoClient mongoClient = new MongoClient(connectionString)){
+    		MongoDatabase mongoDB = mongoClient.getDatabase(Login.bd);
+    		MongoCollection<Document> collection = mongoDB.getCollection("Receitas");
+    		MongoCursor<Document> cursor = collection.find(eq("paciente_Id",_id))
     										.iterator();
     		while(cursor.hasNext()) {
     			lista.add(cursor.next());
@@ -379,7 +434,7 @@ public class ApoiosMongoADO {
     		MongoClientURI connectionString = new MongoClientURI(Login.getURL());
     		try(MongoClient mongoClient = new MongoClient(connectionString)){
     			MongoDatabase mongoDB = mongoClient.getDatabase(Login.bd);
-    			MongoCollection<Document> collection = mongoDB.getCollection("login");
+    			MongoCollection<Document> collection = mongoDB.getCollection("Funcionarios");
     			Document doc = new Document();
     			doc.append("versao", Login.VERSAO);
     			collection.insertOne(doc);
