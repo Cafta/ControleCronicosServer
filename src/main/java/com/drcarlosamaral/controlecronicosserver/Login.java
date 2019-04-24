@@ -25,7 +25,7 @@ import org.bson.Document;
 public class Login {
     private static String name;
     private static String URL = "mongodb://usuario:xyz123@localhost:27017";
-    public static final String bd = "ControleCronicosBD2";//"ControleCronicosBD2";//"ControleNovaAmerica"; //"ControleCronicosBD";
+    public static final String bd = "ControleCronicosBD";//"ControleCronicosBD2";//"ControleNovaAmerica"; //"ControleCronicosBD";
     public static final String VERSAO = "1.1.0 (void)";
     
     /**
