@@ -68,8 +68,15 @@ public class Coneccao implements Runnable{
 						Object retorno = ApoiosMongoADO.get(msg, oos, ois);
 						oos.writeObject(retorno); 
 					}
-				} else if (msg != null && msg.equals("FECHAPORTA")){
-					msg = null;
+				} else if (msg != null && msg.equals("DEL")) {
+					int nDel = (Integer) ois.readObject();
+					for (int i = 0; i < nDel; i++) {
+						msg = (String) ois.readObject();
+						Object retorno = ApoiosMongoADO.del(msg, oos, ois);
+						oos.writeObject(retorno); 
+					}
+//				} else if (msg != null && msg.equals("FECHAPORTA")){
+//					msg = null;
 				} else {
 					msg = null;
 				}

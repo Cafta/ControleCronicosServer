@@ -170,6 +170,20 @@ public class ApoiosMongoADO {
     	}
     }
     
+    public static Object del(String msg, ObjectOutputStream oos, ObjectInputStream ois) {
+    	try {
+	    	if (msg.equals("receita")) {
+	    		ObjectId oId = (ObjectId) ois.readObject();
+	    		return delReceita(oId);
+	    	} else {
+	    		return new Document();
+	    	}
+    	} catch (Exception e) {
+    		e.printStackTrace();
+    		return new Document();
+    	}
+    }
+    
     private static Document getPessoa(ObjectOutputStream oos, ObjectInputStream ois) {
     	Document doc = new Document();
     	// vai passar o que?
@@ -261,8 +275,6 @@ public class ApoiosMongoADO {
     	return "sem versao definida";
     }
     
-   
-    
     private static Object getDadosUsuario(ObjectOutputStream oos, ObjectInputStream ois) {
     	try {
 			String login = (String) ois.readObject();
@@ -322,6 +334,19 @@ public class ApoiosMongoADO {
     		arquivaErro("Erro em ApoiosMongoADO.getVersion()", e);
     	}
 		return lista;
+    }
+    
+    private static boolean delReceita(ObjectId _id) {
+    	MongoClientURI connectionString = new MongoClientURI(Login.getURL());
+    	try (MongoClient mongoClient = new MongoClient(connectionString)){
+    		MongoDatabase mongoDB = mongoClient.getDatabase(Login.bd);
+    		MongoCollection<Document> collection = mongoDB.getCollection("Receitas");
+    		Document retorno = collection.findOneAndDelete(eq("_id",_id));
+    		if (retorno != null) return true;
+    	} catch (Exception e){
+    		arquivaErro("Erro em ApoiosMongoADO.delReceita(Receita_Id)", e);
+    	}
+    	return false;
     }
     
 //    public List<String> getBairros(){
