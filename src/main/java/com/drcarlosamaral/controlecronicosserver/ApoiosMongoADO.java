@@ -184,6 +184,34 @@ public class ApoiosMongoADO {
     	}
     }
     
+    public static Object add(String msg, ObjectOutputStream oos, ObjectInputStream ois) {
+    	try {
+	    	if (msg.equals("receita")) {
+	    		Document receita = (Document) ois.readObject();
+	    		return addReceita(receita);
+	    	} else {
+	    		return new Document();
+	    	}
+    	} catch (Exception e) {
+    		e.printStackTrace();
+    		return new Document();
+    	}
+    }
+    
+    public static Object set(String msg, ObjectOutputStream oos, ObjectInputStream ois) {
+    	try {
+	    	if (msg.equals("receita")) {
+	    		Document receita = (Document) ois.readObject();
+	    		return setReceita(receita);
+	    	} else {
+	    		return new Document();
+	    	}
+    	} catch (Exception e) {
+    		e.printStackTrace();
+    		return new Document();
+    	}
+    }
+    
     private static Document getPessoa(ObjectOutputStream oos, ObjectInputStream ois) {
     	Document doc = new Document();
     	// vai passar o que?
@@ -325,7 +353,7 @@ public class ApoiosMongoADO {
     	try (MongoClient mongoClient = new MongoClient(connectionString)){
     		MongoDatabase mongoDB = mongoClient.getDatabase(Login.bd);
     		MongoCollection<Document> collection = mongoDB.getCollection("Receitas");
-    		MongoCursor<Document> cursor = collection.find(eq("paciente_Id",_id))
+    		MongoCursor<Document> cursor = collection.find(eq("paciente_id",_id))
     										.iterator();
     		while(cursor.hasNext()) {
     			lista.add(cursor.next());
@@ -345,6 +373,32 @@ public class ApoiosMongoADO {
     		if (retorno != null) return true;
     	} catch (Exception e){
     		arquivaErro("Erro em ApoiosMongoADO.delReceita(Receita_Id)", e);
+    	}
+    	return false;
+    }
+    
+    private static Boolean addReceita(Document receita) {
+    	MongoClientURI connectionString = new MongoClientURI(Login.getURL());
+    	try (MongoClient mongoClient = new MongoClient(connectionString)){
+    		MongoDatabase mongoDB = mongoClient.getDatabase(Login.bd);
+    		MongoCollection<Document> collection = mongoDB.getCollection("Receitas");
+    		collection.insertOne(receita);
+    		return true;
+    	} catch (Exception e){
+    		arquivaErro("Erro em ApoiosMongoADO.getPacientes(_id)", e);
+    	}
+    	return false;
+    }
+    
+    private static Boolean setReceita(Document receita) {
+    	MongoClientURI connectionString = new MongoClientURI(Login.getURL());
+    	try (MongoClient mongoClient = new MongoClient(connectionString)){
+    		MongoDatabase mongoDB = mongoClient.getDatabase(Login.bd);
+    		MongoCollection<Document> collection = mongoDB.getCollection("Receitas");
+    		Document d = collection.findOneAndReplace(eq("_id",receita.getObjectId("_id")), receita);
+    		if (d != null) return true;
+    	} catch (Exception e){
+    		arquivaErro("Erro em ApoiosMongoADO.setReceita(receita)", e);
     	}
     	return false;
     }

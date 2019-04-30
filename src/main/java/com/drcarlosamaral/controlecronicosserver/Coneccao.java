@@ -60,6 +60,8 @@ public class Coneccao implements Runnable{
 					int nSet = (Integer) ois.readObject();
 					for (int i = 0; i < nSet; i++) {
 						msg = (String) ois.readObject();
+						Object retorno = ApoiosMongoADO.set(msg, oos, ois);
+						oos.writeObject(retorno); 
 					}
 				} else if (msg != null && msg.equals("GET")) {
 					int nGet = (Integer) ois.readObject();
@@ -75,6 +77,14 @@ public class Coneccao implements Runnable{
 						Object retorno = ApoiosMongoADO.del(msg, oos, ois);
 						oos.writeObject(retorno); 
 					}
+				} else if (msg != null && msg.equals("ADD")) {
+					int nDel = (Integer) ois.readObject();
+					for (int i = 0; i < nDel; i++) {
+						msg = (String) ois.readObject();
+						Object retorno = ApoiosMongoADO.add(msg, oos, ois);
+						oos.writeObject(retorno); 
+					}
+				
 //				} else if (msg != null && msg.equals("FECHAPORTA")){
 //					msg = null;
 				} else {
