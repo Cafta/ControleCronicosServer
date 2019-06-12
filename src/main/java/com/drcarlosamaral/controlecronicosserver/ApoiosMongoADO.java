@@ -69,33 +69,56 @@ public class ApoiosMongoADO {
 //        }
 //    }
     
-//    public static Boolean coneccaoValida(){
-//        File file = new File("config.mdbcf");
-//        if (!file.exists()) return false;
-//        Properties prop = new Properties();
-//        try (InputStream config = new FileInputStream(file)){
-//                prop.load(config);
-//        } catch (Exception putz){
-//            return false;
-//        }
-//        URL = prop.getProperty("url");
-//        //Agora que eu j� verifiquei o arquivo de configuração vamos testar se conecta.
-//        try {
-//	        MongoClientURI connectionString = new MongoClientURI(Login.getURL());
-//	        try (MongoClient mongoClient = new MongoClient(connectionString)){
-//	            MongoDatabase database = mongoClient.getDatabase(Login.bd);
-//	            MongoCollection<Document> collection = database.getCollection("ListaDeBairros");
-//	            Document documento = collection.find().first();
-//	            //se n�o deu erro � porque conectou
-//	            return true;
-//	        } catch (Exception putz){
-//	            //return false;
-//	        }
-//        } catch (Exception putz1) {
-//        	
-//        }
-//        return false;
-//    }
+    public static Boolean coneccaoValida(){
+        /*File file = new File("config.mdbcf");
+        if (!file.exists()) return false;
+        Properties prop = new Properties();
+        try (InputStream config = new FileInputStream(file)){
+                prop.load(config);
+        } catch (Exception putz){
+            return false;
+        }
+        URL = prop.getProperty("url");*/
+        //Agora que eu j� verifiquei o arquivo de configuração vamos testar se conecta.
+        try {
+	        MongoClientURI connectionString = new MongoClientURI(Login.getURL());
+	        try (MongoClient mongoClient = new MongoClient(connectionString)){
+	            MongoDatabase database = mongoClient.getDatabase(Login.bd);
+	            MongoCollection<Document> collection = database.getCollection("Funcionarios");
+	            Document documento = collection.find(eq("login", "usuario")).first();
+	            if (documento == null) { //parece que não tem nem o banco de dados
+	            	Document d1 = new Document();
+	            	Document d2 = new Document();
+	            	Document d3 = new Document();
+	            	d1.append("nome", "Usuário");
+	            	d1.append("login", "usuario");
+	            	d1.append("pwd", 1766);
+	            	d1.append("grupo", "usuario");
+	            	d2.append("grupo", "usuario");
+	            	d2.append("versao", Login.VERSAO);
+	            	d3.append("nome", "Dr.Carlos");
+	            	d3.append("login", "Carlos");
+	            	d3.append("pwd", 1869);
+	            	d3.append("unidade", "C.S.Nova América");
+	            	d3.append("funcao", "Médico(a)");
+	            	d3.append("especializacao", "Generalista");
+	            	d3.append("grupo", "adm");
+	            	List<Document> documents = new ArrayList<>();
+	            	collection.insertOne(d1);
+	            	collection.insertOne(d2);
+	            	collection.insertOne(d3);
+	            }
+	            //se n�o deu erro � porque conectou
+	            return true;
+	        } catch (Exception putz){
+	            //return false;
+	        	System.out.println("Erro em ApoiosMongoDB.conecccaoValida()");
+	        }
+        } catch (Exception putz1) {
+        	System.out.println("Erro em ApoiosMongoDB.conecccaoValida()_2");
+        }
+        return false;
+    }
     
 //    public static void configuraConeccao() {
 //        String erroDepuravel = null;
@@ -152,6 +175,10 @@ public class ApoiosMongoADO {
 	    		return getVersion();
 	    	} else if (msg.equals("listaPessoas")) {
 	    		return getListaPessoas();
+	    	} else if (msg.equals("listaMedicos")) {
+	    		return getListaMedicos();
+	    	} else if (msg.equals("listaFFs")) {
+	    		return getListaFFs();
 	    	} else if (msg.equals("listaReceitas")) {
 	    		ObjectId oId = (ObjectId) ois.readObject();
 	    		return getListaReceitas(oId);
@@ -161,6 +188,8 @@ public class ApoiosMongoADO {
 	    		return getPessoa(oos,ois);
 	    	} else if (msg.equals("paciente")) {
 	    		return getPaciente(oos,ois);
+	    	} else if (msg.equals("enderecoByFF")) {
+	    		return getEnderecoByFF(oos,ois);
 	    	} else {
 	    		return new Document();
 	    	}
@@ -189,9 +218,16 @@ public class ApoiosMongoADO {
 	    	if (msg.equals("receita")) {
 	    		Document receita = (Document) ois.readObject();
 	    		return addReceita(receita);
-	    	} else {
-	    		return new Document();
 	    	}
+	    	if (msg.equals("pessoa")) {
+	    		Document pessoa = (Document) ois.readObject();
+	    		return addPessoa(pessoa);
+	    	}
+	    	if (msg.equals("paciente")) {
+	    		Document paciente = (Document) ois.readObject();
+	    		return addPaciente(paciente);
+	    	}
+	    	return false;
     	} catch (Exception e) {
     		e.printStackTrace();
     		return new Document();
@@ -203,9 +239,16 @@ public class ApoiosMongoADO {
 	    	if (msg.equals("receita")) {
 	    		Document receita = (Document) ois.readObject();
 	    		return setReceita(receita);
-	    	} else {
-	    		return new Document();
 	    	}
+	    	if (msg.equals("pessoa")) {
+	    		Document pessoa = (Document) ois.readObject();
+	    		return setPessoa(pessoa);
+	    	}
+	    	if (msg.equals("paciente")) {
+	    		Document paciente = (Document) ois.readObject();
+	    		return setPaciente(paciente);
+	    	}
+	    	return false;
     	} catch (Exception e) {
     		e.printStackTrace();
     		return new Document();
@@ -228,6 +271,20 @@ public class ApoiosMongoADO {
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
+    	return doc;
+    }
+    
+    private static Document getEnderecoByFF(ObjectOutputStream oos, ObjectInputStream ois) {
+    	Document doc = new Document();
+    	MongoClientURI connectionString = new MongoClientURI(Login.getURL());
+    	try (MongoClient mongoClient = new MongoClient(connectionString)){
+    		String ff = (String) ois.readObject();
+    		MongoDatabase mongoDB = mongoClient.getDatabase(Login.bd);
+    		MongoCollection<Document> collection = mongoDB.getCollection("Enderecos");
+    		doc = collection.find(eq("ff", ff)).first();
+    	} catch (Exception e){
+    		arquivaErro("Erro em ApoiosMongoADO.getEnderecoByFF()", e);
+    	}
     	return doc;
     }
     
@@ -259,6 +316,31 @@ public class ApoiosMongoADO {
     	return doc;
     }
     
+    private static ObjectId addPaciente(Document paciente) {
+    	MongoClientURI connectionString = new MongoClientURI(Login.getURL());
+    	try (MongoClient mongoClient = new MongoClient(connectionString)){
+    		MongoDatabase mongoDB = mongoClient.getDatabase(Login.bd);
+    		MongoCollection<Document> collection = mongoDB.getCollection("Pacientes");
+    		collection.insertOne(paciente);
+    		return paciente.getObjectId("_id");
+    	} catch (Exception e){
+    		arquivaErro("Erro em ApoiosMongoADO.addPaciente(paciente)", e);
+    	}
+    	return null;
+    }
+    private static Boolean setPaciente(Document paciente) {
+    	MongoClientURI connectionString = new MongoClientURI(Login.getURL());
+    	try (MongoClient mongoClient = new MongoClient(connectionString)){
+    		MongoDatabase mongoDB = mongoClient.getDatabase(Login.bd);
+    		MongoCollection<Document> collection = mongoDB.getCollection("Pacientes");
+    		Document d = collection.findOneAndReplace(eq("_id",paciente.getObjectId("_id")), paciente);
+    		if (d != null) return true;
+    	} catch (Exception e){
+    		arquivaErro("Erro em ApoiosMongoADO.setPaciente(paciente)", e);
+    	}
+    	return false;
+    }
+    
     private static List<Document> getPessoa(String nome) {
     	List<Document> pessoas = new ArrayList<>();
     	MongoClientURI connectionString = new MongoClientURI(Login.getURL());
@@ -285,6 +367,30 @@ public class ApoiosMongoADO {
     	}
     	return doc;
     }
+    private static ObjectId addPessoa(Document pessoa) {
+    	MongoClientURI connectionString = new MongoClientURI(Login.getURL());
+    	try (MongoClient mongoClient = new MongoClient(connectionString)){
+    		MongoDatabase mongoDB = mongoClient.getDatabase(Login.bd);
+    		MongoCollection<Document> collection = mongoDB.getCollection("Pessoas");
+    		collection.insertOne(pessoa);
+    		return pessoa.getObjectId("_id");
+    	} catch (Exception e){
+    		arquivaErro("Erro em ApoiosMongoADO.addPessoa(Document pessoa)", e);
+    	}
+    	return null;
+    }
+    private static Boolean setPessoa(Document pessoa) {
+    	MongoClientURI connectionString = new MongoClientURI(Login.getURL());
+    	try (MongoClient mongoClient = new MongoClient(connectionString)){
+    		MongoDatabase mongoDB = mongoClient.getDatabase(Login.bd);
+    		MongoCollection<Document> collection = mongoDB.getCollection("Pessoas");
+    		Document d = collection.findOneAndReplace(eq("_id",pessoa.getObjectId("_id")), pessoa);
+    		if (d != null) return true;
+    	} catch (Exception e){
+    		arquivaErro("Erro em ApoiosMongoADO.setPessoa(pessoa)", e);
+    	}
+    	return false;
+    }
     
     private static String getVersion() {
     	MongoClientURI connectionString = new MongoClientURI(Login.getURL());
@@ -295,12 +401,12 @@ public class ApoiosMongoADO {
     		if (doc != null && !doc.isEmpty()) {
     			return doc.getString("versao");
     		} else {
-    			return "sem versao definida";
+    			return "sem versao definida1";
     		}
     	} catch (Exception e){
     		arquivaErro("Erro em ApoiosMongoADO.getVersion()", e);
     	}
-    	return "sem versao definida";
+    	return "sem versao definida2";
     }
     
     private static Object getDadosUsuario(ObjectOutputStream oos, ObjectInputStream ois) {
@@ -336,13 +442,57 @@ public class ApoiosMongoADO {
     		MongoDatabase mongoDB = mongoClient.getDatabase(Login.bd);
     		MongoCollection<Document> collection = mongoDB.getCollection("Pessoas");
     		MongoCursor<Document> cursor = collection.find(or(eq("posto","NovaAmerica"),not(exists("posto"))))
-    										.projection(eq("name",1))
+    										.projection(and(eq("name",1),eq("sexo", 1)))
     										.iterator();
     		while(cursor.hasNext()) {
     			lista.add(cursor.next());
     		}
     	} catch (Exception e){
-    		arquivaErro("Erro em ApoiosMongoADO.getVersion()", e);
+    		arquivaErro("Erro em ApoiosMongoADO.getListaPessoas()", e);
+    	}
+		return lista;
+    }
+    
+    private static List<String> getListaFFs(){
+    	List<String> lista = new ArrayList<>();
+    	MongoClientURI connectionString = new MongoClientURI(Login.getURL());
+    	try (MongoClient mongoClient = new MongoClient(connectionString)){
+    		MongoDatabase mongoDB = mongoClient.getDatabase(Login.bd);
+    		MongoCollection<Document> collection = mongoDB.getCollection("Enderecos");
+    		MongoCursor<Document> cursor = collection.find(or(eq("posto","NovaAmerica"),not(exists("posto"))))
+    										.projection(eq("ff",1))
+    										.iterator();
+    		while(cursor.hasNext()) {
+    			lista.add(cursor.next().getString("ff"));
+    		}
+    	} catch (Exception e){
+    		arquivaErro("Erro em ApoiosMongoADO.getListaFFs()", e);
+    	}
+		return lista;
+    }
+    
+    private static List<String> getListaMedicos(){
+    	List<String> lista = new ArrayList<>();
+    	MongoClientURI connectionString = new MongoClientURI(Login.getURL());
+    	try (MongoClient mongoClient = new MongoClient(connectionString)){
+    		MongoDatabase mongoDB = mongoClient.getDatabase(Login.bd);
+    		MongoCollection<Document> collectionPessoas = mongoDB.getCollection("Pessoas");
+    		MongoCollection<Document> collectionFuncionarios = mongoDB.getCollection("Funcionarios");
+    		MongoCursor<Document> cursor = collectionFuncionarios.find().iterator();
+    		cursor.forEachRemaining(funcionario -> {
+    			if (funcionario.containsKey("funcao") && funcionario.getString("funcao").equals("Médico(a)")) {
+    				if (funcionario.containsKey("alias")) {
+    					lista.add(funcionario.getString("alias"));
+    				} else {
+    					if (funcionario.containsKey("pessoa_id")) {
+    						Document p = collectionPessoas.find(eq("_id", funcionario.getObjectId("pessoa_id"))).first();
+        					lista.add(p.getString("name"));
+    					}
+    				}
+    			}
+    		});
+    	} catch (Exception e){
+    		arquivaErro("Erro em ApoiosMongoADO.getListaMedicos()", e);
     	}
 		return lista;
     }
@@ -489,7 +639,7 @@ public class ApoiosMongoADO {
                 BufferedWriter bw = new BufferedWriter(fw);
                 pw = new PrintWriter(bw);
                 pw.write(erro);
-                Platform.runLater(new Runnable(){
+/*                Platform.runLater(new Runnable(){
                     @Override public void run() {
                         Alert alert = new Alert(Alert.AlertType.ERROR,
                             "Erro gravado em errolog.txt",
@@ -498,7 +648,7 @@ public class ApoiosMongoADO {
                         alert.setHeaderText("Desculpa, mas ocorreu um erro.");
                         alert.showAndWait();
                     }
-                });
+                });*/
             } catch (Exception putaMerda){
                 putaMerda.printStackTrace(System.out);
             } finally {

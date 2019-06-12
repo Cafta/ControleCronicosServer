@@ -20,6 +20,13 @@ public class Servidor_main {
 	
 	public static void main(String[] args) {
 		
+		// Testando a conecção com o banco de dados
+		ApoiosMongoADO ado = new ApoiosMongoADO();
+		if (!ado.coneccaoValida()) {
+			System.out.println("Erro na coneccao com o MongoDB");
+			return;
+		}
+		
 		int porta = 0;
 		ExecutorService executorService = Executors.newWorkStealingPool();
 		portasLivres = new HashSet<Integer>();
