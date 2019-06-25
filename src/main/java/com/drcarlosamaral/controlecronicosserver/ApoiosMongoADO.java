@@ -23,6 +23,7 @@ import org.bson.types.ObjectId;
 
 import com.mongodb.MongoClient;
 import com.mongodb.MongoClientURI;
+import com.mongodb.client.DistinctIterable;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoCursor;
 import com.mongodb.client.MongoDatabase;
@@ -179,6 +180,8 @@ public class ApoiosMongoADO {
 	    		return getListaMedicos();
 	    	} else if (msg.equals("listaFFs")) {
 	    		return getListaFFs();
+	    	} else if (msg.equals("listaRuas")) {
+	    		return getListaRuas();
 	    	} else if (msg.equals("listaReceitas")) {
 	    		ObjectId oId = (ObjectId) ois.readObject();
 	    		return getListaReceitas(oId);
@@ -627,6 +630,24 @@ public class ApoiosMongoADO {
     	} catch (Exception e){
     		arquivaErro("Erro em ApoiosMongoADO.getListaFFs()", e);
     	}
+		return lista;
+    }
+    
+    private static List<String> getListaRuas(){
+    	List<String> lista = new ArrayList<>();
+    	MongoClientURI connectionString = new MongoClientURI(Login.getURL());
+    	try (MongoClient mongoClient = new MongoClient(connectionString)){
+    		MongoDatabase mongoDB = mongoClient.getDatabase(Login.bd);
+    		MongoCollection<Document> collection = mongoDB.getCollection("Enderecos");
+    		DistinctIterable<String> distinctRuas = collection.distinct("rua", String.class);
+    		for (String rua : distinctRuas) {
+    			if (rua != null && !rua.equals(""))
+    				lista.add(rua);
+    		}
+    	} catch (Exception e){
+    		arquivaErro("Erro em ApoiosMongoADO.getListaRuas()", e);
+    	}
+    	System.out.println("A lista de ruas tem " + lista.size() + " nomes");
 		return lista;
     }
     
