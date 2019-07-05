@@ -174,6 +174,8 @@ public class ApoiosMongoADO {
     	try {
 	    	if (msg.equals("versao")) {
 	    		return getVersion();
+	    	} else if (msg.equals("lista")) {
+	    		return getLista(oos,ois);
 	    	} else if (msg.equals("listaPessoas")) {
 	    		return getListaPessoas();
 	    	} else if (msg.equals("listaMedicos")) {
@@ -191,6 +193,8 @@ public class ApoiosMongoADO {
 	    		return getPessoa(oos,ois);
 	    	} else if (msg.equals("paciente")) {
 	    		return getPaciente(oos,ois);
+	    	} else if (msg.equals("funcionario")) {
+	    		return getFuncionario(oos,ois);
 	    	} else if (msg.equals("enderecoByFF")) {
 	    		return getEnderecoByFF(oos,ois);
 	    	} else if (msg.equals("controleHas")) {
@@ -204,6 +208,28 @@ public class ApoiosMongoADO {
     		e.printStackTrace();
     		return new Document();
     	}
+    }
+    
+    public static List<Document> getLista(ObjectOutputStream oos, ObjectInputStream ois) {
+    	
+    	try {
+    		// lista do quê:
+    		String oque = (String) ois.readObject();
+    		if (oque.equals("pessoas")){
+    			return getListaPessoas();
+    		} else if (oque.equals("funcionarios")) {
+    			return getListaFuncionarios();
+    		} else if (oque.equals("medicos")) {
+    			return getListaMedicos();
+    		} else if (oque.equals("alias")) {
+    			return getListaAlias();
+    		} else if (oque.equals("funcoes")) {
+    			return getListaFuncoes();
+    		}
+    	} catch (Exception e) {
+    		e.printStackTrace();
+    	}
+    	return new ArrayList<Document>();
     }
     
     public static Object del(String msg, ObjectOutputStream oos, ObjectInputStream ois) {
@@ -294,6 +320,79 @@ public class ApoiosMongoADO {
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
+    	return doc;
+    }
+    
+    private static Document getFuncionario(ObjectOutputStream oos, ObjectInputStream ois) {
+    	Document doc = new Document();
+    	// vai passar o que?
+    	try {
+			String resposta = (String) ois.readObject();
+			if (resposta.equals("byLogin")) {
+				String log = (String) ois.readObject();
+				Integer pwd = (Integer) ois.readObject();
+				return getFuncionario(log, pwd);
+			} else if (resposta.equals("byAlias")) {
+				String alias = (String) ois.readObject();
+				return getFuncionarioByAlias(alias);
+			} else if (resposta.equals("byId")) {
+				ObjectId _id = (ObjectId) ois.readObject();
+				return getFuncionarioById(_id);
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+    	return doc;
+    }
+    
+    private static Document getFuncionario(String login, Integer pwd) {
+    	
+    	System.out.println("Para pegar funcionario temos:");
+    	System.out.println("login: " + login + ", pwd: " + pwd.toString());
+    	
+    	Document doc = new Document();
+    	MongoClientURI connectionString = new MongoClientURI(Login.getURL());
+    	try (MongoClient mongoClient = new MongoClient(connectionString)){
+    		MongoDatabase mongoDB = mongoClient.getDatabase(Login.bd);
+    		MongoCollection<Document> collection = mongoDB.getCollection("Funcionarios");
+    		doc = collection.find(and(eq("login", login),eq("pwd", pwd))).first();
+    	} catch (Exception e){
+    		arquivaErro("Erro em ApoiosMongoADO.getFuncionario(login, pwd)", e);
+    	}
+    	
+    	System.out.println("Pegou o funcionario com _id: " + doc.getObjectId("_id"));
+    	
+    	return doc;
+    }
+    
+    private static Document getFuncionarioByAlias(String alias) {
+    	System.out.println("procurando Funcionario by alias. Alias: " + alias);
+    	Document doc = new Document();
+    	MongoClientURI connectionString = new MongoClientURI(Login.getURL());
+    	try (MongoClient mongoClient = new MongoClient(connectionString)){
+    		MongoDatabase mongoDB = mongoClient.getDatabase(Login.bd);
+    		MongoCollection<Document> collection = mongoDB.getCollection("Funcionarios");
+    		Document basicQuery = new Document();
+    		basicQuery.append("alias", new Document("$regex",alias).append("$options","i"));
+    		doc = collection.find(basicQuery).first();
+    	} catch (Exception e){
+    		arquivaErro("Erro em ApoiosMongoADO.getFuncionarioByAlias(alias)", e);
+    	}
+    	System.out.println("Resultado: " + doc);
+    	return doc;
+    }
+    
+    private static Document getFuncionarioById(ObjectId _id) {
+    	Document doc = new Document();
+    	MongoClientURI connectionString = new MongoClientURI(Login.getURL());
+    	try (MongoClient mongoClient = new MongoClient(connectionString)){
+    		MongoDatabase mongoDB = mongoClient.getDatabase(Login.bd);
+    		MongoCollection<Document> collection = mongoDB.getCollection("Funcionarios");
+    		doc = collection.find(eq("_id", _id)).first();
+    	} catch (Exception e){
+    		arquivaErro("Erro em ApoiosMongoADO.getFuncionarioById(_id)", e);
+    	}
+    	System.out.println("Resultado: " + doc);
     	return doc;
     }
     
@@ -603,14 +702,75 @@ public class ApoiosMongoADO {
     	try (MongoClient mongoClient = new MongoClient(connectionString)){
     		MongoDatabase mongoDB = mongoClient.getDatabase(Login.bd);
     		MongoCollection<Document> collection = mongoDB.getCollection("Pessoas");
-    		MongoCursor<Document> cursor = collection.find(or(eq("posto","NovaAmerica"),not(exists("posto"))))
-    										.projection(and(eq("name",1),eq("sexo", 1)))
+    		MongoCursor<Document> cursor = collection.find(or(eq("posto","C.S.Nova América"),not(exists("posto"))))
+    										.projection(and(eq("name",1),eq("sexo", 1), eq("paciente_id", 1), eq("funcionario_id", 1)))
     										.iterator();
     		while(cursor.hasNext()) {
-    			lista.add(cursor.next());
+    			Document d = cursor.next();
+    			d.append("pessoa_id", d.getObjectId("_id"));
+    			lista.add(d);
     		}
     	} catch (Exception e){
     		arquivaErro("Erro em ApoiosMongoADO.getListaPessoas()", e);
+    	}
+		return lista;
+    }
+    
+    private static List<Document> getListaFuncionarios(){
+    	List<Document> lista = new ArrayList<>();
+    	MongoClientURI connectionString = new MongoClientURI(Login.getURL());
+    	try (MongoClient mongoClient = new MongoClient(connectionString)){
+    		MongoDatabase mongoDB = mongoClient.getDatabase(Login.bd);
+    		MongoCollection<Document> collection = mongoDB.getCollection("Pessoas");
+    		MongoCursor<Document> cursor = collection.find(exists("funcionario_id"))
+    										.projection(and(eq("name",1),eq("funcionario_id", 1)))
+    										.iterator();
+    		while(cursor.hasNext()) {
+    			Document d = cursor.next();
+    			d.append("pessoa_id", d.getObjectId("_id"));
+    			lista.add(d);
+    		}
+    	} catch (Exception e){
+    		arquivaErro("Erro em ApoiosMongoADO.getListaPessoas()", e);
+    	}
+		return lista;
+    }
+    
+    private static List<Document> getListaAlias(){
+    	List<Document> lista = new ArrayList<>();
+    	MongoClientURI connectionString = new MongoClientURI(Login.getURL());
+    	try (MongoClient mongoClient = new MongoClient(connectionString)){
+    		MongoDatabase mongoDB = mongoClient.getDatabase(Login.bd);
+    		MongoCollection<Document> collection = mongoDB.getCollection("Funcionarios");
+    		MongoCursor<Document> cursor = collection.find(exists("alias"))
+    										.projection(eq("alias",1))
+    										.iterator();
+    		while(cursor.hasNext()) {
+    			Document d = cursor.next();
+    			d.append("funcionario_id", d.getObjectId("_id"));
+    			lista.add(d);
+    		}
+    	} catch (Exception e){
+    		arquivaErro("Erro em ApoiosMongoADO.getListaAlias()", e);
+    	}
+		return lista;
+    }
+    
+    private static List<Document> getListaFuncoes(){
+    	List<Document> lista = new ArrayList<>();
+    	MongoClientURI connectionString = new MongoClientURI(Login.getURL());
+    	try (MongoClient mongoClient = new MongoClient(connectionString)){
+    		MongoDatabase mongoDB = mongoClient.getDatabase(Login.bd);
+    		MongoCollection<Document> collection = mongoDB.getCollection("Funcionarios");
+    		
+    		DistinctIterable<String> distinctFuncoes = collection.distinct("funcao", String.class);
+    		for (String funcao : distinctFuncoes) {
+    			if (funcao != null && !funcao.equals("")) {
+    				lista.add(new Document("funcao", funcao));
+    			}
+    		}
+    	} catch (Exception e){
+    		arquivaErro("Erro em ApoiosMongoADO.getListaFuncoes()", e);
     	}
 		return lista;
     }
@@ -621,7 +781,7 @@ public class ApoiosMongoADO {
     	try (MongoClient mongoClient = new MongoClient(connectionString)){
     		MongoDatabase mongoDB = mongoClient.getDatabase(Login.bd);
     		MongoCollection<Document> collection = mongoDB.getCollection("Enderecos");
-    		MongoCursor<Document> cursor = collection.find(or(eq("posto","NovaAmerica"),not(exists("posto"))))
+    		MongoCursor<Document> cursor = collection.find(or(eq("posto","C.S.Nova América"),not(exists("posto"))))
     										.projection(eq("ff",1))
     										.iterator();
     		while(cursor.hasNext()) {
@@ -651,25 +811,24 @@ public class ApoiosMongoADO {
 		return lista;
     }
     
-    private static List<String> getListaMedicos(){
-    	List<String> lista = new ArrayList<>();
+    private static List<Document> getListaMedicos(){
+    	List<Document> lista = new ArrayList<>();
     	MongoClientURI connectionString = new MongoClientURI(Login.getURL());
     	try (MongoClient mongoClient = new MongoClient(connectionString)){
     		MongoDatabase mongoDB = mongoClient.getDatabase(Login.bd);
     		MongoCollection<Document> collectionPessoas = mongoDB.getCollection("Pessoas");
     		MongoCollection<Document> collectionFuncionarios = mongoDB.getCollection("Funcionarios");
-    		MongoCursor<Document> cursor = collectionFuncionarios.find().iterator();
+    		MongoCursor<Document> cursor = collectionFuncionarios.find(eq("funcao", "Médico(a)")).iterator();
     		cursor.forEachRemaining(funcionario -> {
-    			if (funcionario.containsKey("funcao") && funcionario.getString("funcao").equals("Médico(a)")) {
-    				if (funcionario.containsKey("alias")) {
-    					lista.add(funcionario.getString("alias"));
-    				} else {
-    					if (funcionario.containsKey("pessoa_id")) {
-    						Document p = collectionPessoas.find(eq("_id", funcionario.getObjectId("pessoa_id"))).first();
-        					lista.add(p.getString("name"));
-    					}
-    				}
+    			Document d = new Document();
+    			d.append("funcionario_id", funcionario.getObjectId("_id"));
+    			if (funcionario.containsKey("alias")) d.append("alias", funcionario.getString("alias"));
+    			if (funcionario.containsKey("pessoa_id")) {
+    				d.append("pessoa_id", funcionario.getObjectId("pessoa_id"));
+    				Document p = collectionPessoas.find(eq("_id", funcionario.getObjectId("pessoa_id"))).first();
+    				d.append("name", p.getString("name"));
     			}
+    			lista.add(d);
     		});
     	} catch (Exception e){
     		arquivaErro("Erro em ApoiosMongoADO.getListaMedicos()", e);
