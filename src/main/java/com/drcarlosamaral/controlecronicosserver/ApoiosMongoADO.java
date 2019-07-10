@@ -256,6 +256,10 @@ public class ApoiosMongoADO {
 	    		Document pessoa = (Document) ois.readObject();
 	    		return addPessoa(pessoa);
 	    	}
+	    	if (msg.equals("funcionario")) {
+	    		Document funcionario = (Document) ois.readObject();
+	    		return addFuncionario(funcionario);
+	    	}
 	    	if (msg.equals("paciente")) {
 	    		Document paciente = (Document) ois.readObject();
 	    		return addPaciente(paciente);
@@ -292,6 +296,10 @@ public class ApoiosMongoADO {
 	    	if (msg.equals("paciente")) {
 	    		Document paciente = (Document) ois.readObject();
 	    		return setPaciente(paciente);
+	    	}
+	    	if (msg.equals("funcionario")) {
+	    		Document funcionario = (Document) ois.readObject();
+	    		return setFuncionario(funcionario);
 	    	}
 	    	if (msg.equals("endereco")) {
 	    		Document endereco = (Document) ois.readObject();
@@ -735,7 +743,30 @@ public class ApoiosMongoADO {
     	}
 		return lista;
     }
-    
+    private static ObjectId addFuncionario(Document funcionario) {
+    	MongoClientURI connectionString = new MongoClientURI(Login.getURL());
+    	try (MongoClient mongoClient = new MongoClient(connectionString)){
+    		MongoDatabase mongoDB = mongoClient.getDatabase(Login.bd);
+    		MongoCollection<Document> collection = mongoDB.getCollection("Funcionarios");
+    		collection.insertOne(funcionario);
+    		return funcionario.getObjectId("_id");
+    	} catch (Exception e){
+    		arquivaErro("Erro em ApoiosMongoADO.addFuncionario(Document funcionario)", e);
+    	}
+    	return null;
+    }
+    private static Boolean setFuncionario(Document funcionario) {
+    	MongoClientURI connectionString = new MongoClientURI(Login.getURL());
+    	try (MongoClient mongoClient = new MongoClient(connectionString)){
+    		MongoDatabase mongoDB = mongoClient.getDatabase(Login.bd);
+    		MongoCollection<Document> collection = mongoDB.getCollection("Funcionarios");
+    		Document d = collection.findOneAndReplace(eq("_id",funcionario.getObjectId("_id")), funcionario);
+    		if (d != null) return true;
+    	} catch (Exception e){
+    		arquivaErro("Erro em ApoiosMongoADO.setFuncionario(funcionario)", e);
+    	}
+    	return false;
+    }
     private static List<Document> getListaAlias(){
     	List<Document> lista = new ArrayList<>();
     	MongoClientURI connectionString = new MongoClientURI(Login.getURL());
