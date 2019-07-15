@@ -47,7 +47,8 @@ public class Login {
                 MongoCollection<Document> collection = mongoDB.getCollection("Funcionarios");
                 Document pDoc = collection.find(eq("login", login)).first();
                 if (pDoc == null) return false;
-                if (Objects.equals(pDoc.getLong("pwd"), pwd)){
+                Long pwdLong = pDoc.getLong("pwd");
+                if (Long.compare(pwdLong, pwd) == 0){
                     Login.name = pDoc.getString("nome");
                 } else {
                     return false;

@@ -71,15 +71,6 @@ public class ApoiosMongoADO {
 //    }
     
     public static Boolean coneccaoValida(){
-        /*File file = new File("config.mdbcf");
-        if (!file.exists()) return false;
-        Properties prop = new Properties();
-        try (InputStream config = new FileInputStream(file)){
-                prop.load(config);
-        } catch (Exception putz){
-            return false;
-        }
-        URL = prop.getProperty("url");*/
         //Agora que eu j� verifiquei o arquivo de configuração vamos testar se conecta.
         try {
 	        MongoClientURI connectionString = new MongoClientURI(Login.getURL());
@@ -90,23 +81,24 @@ public class ApoiosMongoADO {
 	            if (documento == null) { //parece que não tem nem o banco de dados
 	            	Document d1 = new Document();
 	            	Document d2 = new Document();
-	            	Document d3 = new Document();
 	            	d1.append("nome", "Usuário");
 	            	d1.append("login", "usuario");
-	            	d1.append("pwd", 1766);
+	            	d1.append("pwd", 1766L);
 	            	d1.append("grupo", "usuario");
 	            	d2.append("grupo", "usuario");
 	            	d2.append("versao", Login.VERSAO);
-	            	d3.append("nome", "Dr.Carlos");
-	            	d3.append("login", "Carlos");
-	            	d3.append("pwd", 1869);
-	            	d3.append("unidade", "C.S.Nova América");
-	            	d3.append("funcao", "Médico(a)");
-	            	d3.append("especializacao", "Generalista");
-	            	d3.append("grupo", "adm");
 	            	List<Document> documents = new ArrayList<>();
 	            	collection.insertOne(d1);
 	            	collection.insertOne(d2);
+	            }
+	            documento = collection.find(eq("Alias", "Administrador")).first();
+	            if (documento == null) {
+	            	Document d3 = new Document();
+	            	d3.append("Alias", "Administrador");
+	            	d3.append("login", "Admin");
+	            	Long pwdL = encripted("Admin", "xyz123");
+	            	d3.append("pwd", pwdL);
+	            	d3.append("grupo", "adm");
 	            	collection.insertOne(d3);
 	            }
 	            //se n�o deu erro � porque conectou
@@ -197,6 +189,8 @@ public class ApoiosMongoADO {
 	    		return getFuncionario(oos,ois);
 	    	} else if (msg.equals("enderecoByFF")) {
 	    		return getEnderecoByFF(oos,ois);
+	    	} else if (msg.equals("enderecoById")) {
+	    		return getEnderecoById(oos,ois);
 	    	} else if (msg.equals("controleHas")) {
 	    		return getControleHas(oos,ois);
 	    	} else if (msg.equals("controleDm")) {
@@ -225,7 +219,9 @@ public class ApoiosMongoADO {
     			return getListaAlias();
     		} else if (oque.equals("funcoes")) {
     			return getListaFuncoes();
-    		}
+    		} else if (oque.equals("especializacoes")) {
+				return getListaEspecializacoes();
+			}
     	} catch (Exception e) {
     		e.printStackTrace();
     	}
@@ -401,6 +397,20 @@ public class ApoiosMongoADO {
     		arquivaErro("Erro em ApoiosMongoADO.getFuncionarioById(_id)", e);
     	}
     	System.out.println("Resultado: " + doc);
+    	return doc;
+    }
+    
+    private static Document getEnderecoById(ObjectOutputStream oos, ObjectInputStream ois) {
+    	Document doc = new Document();
+    	MongoClientURI connectionString = new MongoClientURI(Login.getURL());
+    	try (MongoClient mongoClient = new MongoClient(connectionString)){
+    		ObjectId _id = (ObjectId) ois.readObject();
+    		MongoDatabase mongoDB = mongoClient.getDatabase(Login.bd);
+    		MongoCollection<Document> collection = mongoDB.getCollection("Enderecos");
+    		doc = collection.find(eq("_id", _id)).first();
+    	} catch (Exception e){
+    		arquivaErro("Erro em ApoiosMongoADO.getEnderecoById()", e);
+    	}
     	return doc;
     }
     
@@ -806,6 +816,25 @@ public class ApoiosMongoADO {
 		return lista;
     }
     
+    private static List<Document> getListaEspecializacoes(){
+    	List<Document> lista = new ArrayList<>();
+    	MongoClientURI connectionString = new MongoClientURI(Login.getURL());
+    	try (MongoClient mongoClient = new MongoClient(connectionString)){
+    		MongoDatabase mongoDB = mongoClient.getDatabase(Login.bd);
+    		MongoCollection<Document> collection = mongoDB.getCollection("Funcionarios");
+    		
+    		DistinctIterable<String> distinctEspecializacoes = collection.distinct("especializacao", String.class);
+    		for (String especializacao : distinctEspecializacoes) {
+    			if (especializacao != null && !especializacao.equals("")) {
+    				lista.add(new Document("especializacao", especializacao));
+    			}
+    		}
+    	} catch (Exception e){
+    		arquivaErro("Erro em ApoiosMongoADO.getListaEspecializacoes()", e);
+    	}
+		return lista;
+    }
+    
     private static List<String> getListaFFs(){
     	List<String> lista = new ArrayList<>();
     	MongoClientURI connectionString = new MongoClientURI(Login.getURL());
@@ -1043,4 +1072,19 @@ public class ApoiosMongoADO {
     	}
     }
     
+    private static Long encripted(String nome, String pwd){
+        Long encrip = 0L;
+        char[] charNome = nome.toCharArray();
+        char[] charPwd = pwd.toCharArray();
+        for (int i = 0; i < charNome.length; i++){
+            int val = (int) charNome[i];
+            encrip = encrip + val;
+        }
+        encrip = encrip * 2;
+        for (int i = 0; i < charPwd.length; i++){
+            int val = (int) charPwd[i];
+            encrip = encrip + val + (i*2);
+        }
+        return encrip;
+    }
 }
