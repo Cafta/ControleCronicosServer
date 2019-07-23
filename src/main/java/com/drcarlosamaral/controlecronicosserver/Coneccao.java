@@ -54,8 +54,13 @@ public class Coneccao implements Runnable{
 			
 			// trabalhando com as requisições: 
 			while (msg != null) {
-				msg = (String) ois.readObject();
-				
+				Object obj = ois.readObject();
+				if (obj instanceof String) {
+					msg = (String) obj;
+				} else {
+					msg = null;
+					System.out.println("ERRO AO PEGAR COMANDO GET, SET, ADD ou DEL");
+				}
 				if (msg != null && msg.equals("SET")) {
 					int nSet = (Integer) ois.readObject();
 					for (int i = 0; i < nSet; i++) {
