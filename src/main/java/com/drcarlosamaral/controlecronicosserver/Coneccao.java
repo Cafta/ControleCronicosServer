@@ -10,6 +10,7 @@ import java.net.Socket;
 
 public class Coneccao implements Runnable{
 	int porta;
+	private ApoiosMongoADO ado = new ApoiosMongoADO();
 	
 	public Coneccao(int porta) {
 		this.porta = porta;
@@ -65,28 +66,28 @@ public class Coneccao implements Runnable{
 					int nSet = (Integer) ois.readObject();
 					for (int i = 0; i < nSet; i++) {
 						msg = (String) ois.readObject();
-						Object retorno = ApoiosMongoADO.set(msg, oos, ois);
+						Object retorno = ado.set(msg, oos, ois);
 						oos.writeObject(retorno); 
 					}
 				} else if (msg != null && msg.equals("GET")) {
 					int nGet = (Integer) ois.readObject();
 					for (int i = 0; i < nGet; i++) {
 						msg = (String) ois.readObject();
-						Object retorno = ApoiosMongoADO.get(msg, oos, ois);
+						Object retorno = ado.get(msg, oos, ois);
 						oos.writeObject(retorno); 
 					}
 				} else if (msg != null && msg.equals("DEL")) {
 					int nDel = (Integer) ois.readObject();
 					for (int i = 0; i < nDel; i++) {
 						msg = (String) ois.readObject();
-						Object retorno = ApoiosMongoADO.del(msg, oos, ois);
+						Object retorno = ado.del(msg, oos, ois);
 						oos.writeObject(retorno); 
 					}
 				} else if (msg != null && msg.equals("ADD")) {
 					int nDel = (Integer) ois.readObject();
 					for (int i = 0; i < nDel; i++) {
 						msg = (String) ois.readObject();
-						Object retorno = ApoiosMongoADO.add(msg, oos, ois);
+						Object retorno = ado.add(msg, oos, ois);
 						oos.writeObject(retorno); 
 					}
 				
