@@ -109,56 +109,7 @@ public class ApoiosMongoADO {
         }
         return false;
     }
-    
-//    public static void configuraConeccao() {
-//        String erroDepuravel = null;
-//        File file = new File("config.mdbcf");
-//        Properties prop = new Properties();
-//        // Se nao tem arquivo de configuracao cria com URL default
-//        if (!file.exists()){
-//            prop.setProperty("url", "mongodb://root:root@localhost:27017");
-//            try (OutputStream out = new FileOutputStream("config.mdbcf")){
-//                prop.store(out, "Este arquivo foi gravado automaticamente por ApoiosMongoADO.java");
-//            } catch (Exception e){
-//                arquivaErro("Erro em ApoiosMongoADO.configuraConeccao()", e);
-//            }
-//        }
-//        // Agora já tem arquivo de configuração prévio ou recem criado.
-//        // Pego o URL do arquivo de configuração para que o usuário possa fazer a alteração nele, se desejar
-//        try (InputStream config = new FileInputStream(file)){
-//            prop.load(config);
-//            URL = prop.getProperty("url");
-//        } catch (Exception putz){
-//            erroDepuravel = "Erro ao ler propriedades do arquivo de configuração";
-//        }
-//        TextInputDialog inputDialog;
-//        if (erroDepuravel == null){ 
-//            inputDialog = new TextInputDialog(URL);
-//        } else {
-//            inputDialog = new TextInputDialog("mongodb://root:root@localhost:27017");
-//        }
-//        inputDialog.setTitle("Configuração");
-//        inputDialog.setHeaderText("Escreva a URL completa de acesso ao MongoDB");
-//        inputDialog.setContentText("URL:");
-//        Optional<String> urlTyped = inputDialog.showAndWait();
-//        if (urlTyped.isPresent()) {
-//            prop.setProperty("url", urlTyped.get());
-//            try (OutputStream out = new FileOutputStream("config.mdbcf")){
-//                prop.store(out, "Este arquivo foi gravado automaticamente por ApoiosMongoADO.java");
-//            } catch (Exception e){
-//                arquivaErro("Erro em ApoiosMongoADO.configuraConeccao() no prop.store2", e);
-//            }
-//        } 
-//    }
-    
-//    public static String getString(String msg) {
-//    	// abaixo é só um teste
-//    	if (msg.equals("versao")) {
-//    		return getVersion();
-//    	}
-//    	return "Objeto Indefinido"; 
-//    }
-    
+
     public Object get(String msg, ObjectOutputStream oos, ObjectInputStream ois) {
     	try {
 	    	if (msg.equals("versao")) {
@@ -294,42 +245,46 @@ public class ApoiosMongoADO {
 	    	if (msg.equals("receita")) {
 	    		Document receita = (Document) ois.readObject();
 	    		return addReceita(receita);
-	    	}
+	    	} else
 	    	if (msg.equals("pessoa")) {
 	    		Document pessoa = (Document) ois.readObject();
 	    		return addPessoa(pessoa);
-	    	}
+	    	} else
 	    	if (msg.equals("consulta")) {
 	    		Document consulta = (Document) ois.readObject();
 	    		return addConsulta(consulta);
-	    	}
+	    	} else
 	    	if (msg.equals("impresso")) {
 	    		Document impresso = (Document) ois.readObject();
 	    		return addImpresso(impresso);
-	    	}
+	    	} else
 	    	if (msg.equals("exame")) {
 	    		Document exame = (Document) ois.readObject();
 	    		return addExame(exame);
-	    	}
+	    	} else
 	    	if (msg.equals("funcionario")) {
 	    		Document funcionario = (Document) ois.readObject();
 	    		return addFuncionario(funcionario);
-	    	}
+	    	} else 
 	    	if (msg.equals("paciente")) {
 	    		Document paciente = (Document) ois.readObject();
 	    		return addPaciente(paciente);
-	    	}
+	    	} else
 	    	if (msg.equals("controleHas")) {
 	    		Document controleHas = (Document) ois.readObject();
 	    		return addControleHas(controleHas);
-	    	}
+	    	} else
 	    	if (msg.equals("controleDm")) {
 	    		Document controleDm = (Document) ois.readObject();
 	    		return addControleDm(controleDm);
-	    	}
+	    	} else
 	    	if (msg.equals("endereco")) {
 	    		Document endereco = (Document) ois.readObject();
 	    		return addEndereco(endereco);
+	    	} else
+	    	if (msg.equals("arquivo")) {
+	    		Document arquivo = (Document) ois.readObject();
+	    		return addArquivo(arquivo);
 	    	}
 	    	return false;
     	} catch (Exception e) {
@@ -674,6 +629,18 @@ public class ApoiosMongoADO {
     	}
     	return null;
     }
+    private ObjectId addArquivo(Document arquivo) {
+    	MongoClientURI connectionString = new MongoClientURI(Login.getURL());
+    	try (MongoClient mongoClient = new MongoClient(connectionString)){
+    		MongoDatabase mongoDB = mongoClient.getDatabase(Login.bd);
+    		MongoCollection<Document> collection = mongoDB.getCollection("Arquivos");
+    		collection.insertOne(arquivo);
+    		return arquivo.getObjectId("_id");
+    	} catch (Exception e){
+    		arquivaErro("Erro em ApoiosMongoADO.addArquivo(arquivo)", e);
+    	}
+    	return null;
+    }
     private  Boolean setPaciente(Document paciente) {
     	MongoClientURI connectionString = new MongoClientURI(Login.getURL());
     	try (MongoClient mongoClient = new MongoClient(connectionString)){
@@ -950,7 +917,7 @@ public class ApoiosMongoADO {
     	return doc;
     }
     
-    private  Boolean delImpresso(ObjectId _id) {
+    private Boolean delImpresso(ObjectId _id) {
     	MongoClientURI connectionString = new MongoClientURI(Login.getURL());
     	try (MongoClient mongoClient = new MongoClient(connectionString)){
     		MongoDatabase mongoDB = mongoClient.getDatabase(Login.bd);
@@ -1287,15 +1254,7 @@ public class ApoiosMongoADO {
     		MongoCollection<Document> collectionFuncionarios = mongoDB.getCollection("Funcionarios");
     		MongoCursor<Document> cursor = collectionFuncionarios.find(eq("funcao", "Médico(a)")).iterator();
     		cursor.forEachRemaining(funcionario -> {
-    			Document d = new Document();
-    			d.append("funcionario_id", funcionario.getObjectId("_id"));
-    			if (funcionario.containsKey("alias")) d.append("alias", funcionario.getString("alias"));
-    			if (funcionario.containsKey("pessoa_id")) {
-    				d.append("pessoa_id", funcionario.getObjectId("pessoa_id"));
-    				Document p = collectionPessoas.find(eq("_id", funcionario.getObjectId("pessoa_id"))).first();
-    				d.append("name", p.getString("name"));
-    			}
-    			lista.add(d);
+    			lista.add(funcionario);
     		});
     	} catch (Exception e){
     		arquivaErro("Erro em ApoiosMongoADO.getListaMedicos()", e);

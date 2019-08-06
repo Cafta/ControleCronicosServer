@@ -55,6 +55,7 @@ public class Servidor_main {
 					}
 				}
 				System.out.println("Servidor: Pegou a porta " + porta);
+				bloqueiaPorta(porta);
 				Coneccao conn = new Coneccao(porta);
 				printWriter.println(porta);
 				
