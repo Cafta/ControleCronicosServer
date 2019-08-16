@@ -302,6 +302,10 @@ public class ApoiosMongoADO {
 	    		Document dm = (Document) ois.readObject();
 	    		return setControleDm(dm);
 	    	} else
+	    	if (msg.equals("controleGest")) {
+	    		Document cGest = (Document) ois.readObject();
+	    		return setControleGest(cGest);
+	    	} else
 	    	if (msg.equals("gestacao")) {
 	    		Document gestacao = (Document) ois.readObject();
 	    		return setGestacao(gestacao);
@@ -726,6 +730,19 @@ public class ApoiosMongoADO {
     		if (d != null) return true;
     	} catch (Exception e){
     		arquivaErro("Erro em ApoiosMongoADO.setControleDm(dm)", e);
+    	}
+    	return false;
+    }
+    private  Boolean setControleGest(Document cGest) {
+    	MongoClientURI connectionString = new MongoClientURI(Login.getURL());
+    	try (MongoClient mongoClient = new MongoClient(connectionString)){
+    		MongoDatabase mongoDB = mongoClient.getDatabase(Login.bd);
+    		MongoCollection<Document> collection = mongoDB.getCollection("ControleGest");
+    		Document d = collection.findOneAndReplace(eq("_id", cGest.getObjectId("_id")), cGest);
+    		if (d != null) return true;
+    	} catch (Exception e){
+    		e.printStackTrace();
+    		arquivaErro("Erro em ApoiosMongoADO.setControleGest()", e);
     	}
     	return false;
     }
