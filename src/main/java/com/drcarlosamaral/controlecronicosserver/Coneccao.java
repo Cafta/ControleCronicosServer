@@ -7,9 +7,12 @@ import java.io.OutputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
 
+import javafx.application.Platform;
+
 public class Coneccao implements Runnable{
 	int porta;
 	private ApoiosMongoADO ado = new ApoiosMongoADO();
+	private ServerSocket serverSocket;
 	
 	public Coneccao(int porta) {
 		this.porta = porta;
@@ -30,8 +33,10 @@ public class Coneccao implements Runnable{
 	@Override
 	public void run() {
 		try (ServerSocket serverSocket = new ServerSocket(porta)) {
+			this.serverSocket = serverSocket;
+			serverSocket.setSoTimeout(30000);
 			Socket clientSocket = serverSocket.accept();
-			System.out.println("Coneccao: Porta " + porta + " bloqueada");
+			//System.out.println("Coneccao: Porta " + porta + " bloqueada");
 			//Servidor_main.bloqueiaPorta(porta); // Já bloqueei
 			OutputStream socketOut = clientSocket.getOutputStream();
 			InputStream socketIn = clientSocket.getInputStream();
@@ -53,56 +58,44 @@ public class Coneccao implements Runnable{
 			}
 			
 			// trabalhando com as requisições: 
-			while (msg != null) {
-				Object obj = ois.readObject();
-				if (obj instanceof String) {
-					msg = (String) obj;
-				} else {
-					msg = null;
-					System.out.println("ERRO AO PEGAR COMANDO GET, SET, ADD ou DEL");
-				}
-				if (msg != null && msg.equals("SET")) {
-					int nSet = (Integer) ois.readObject();
-					for (int i = 0; i < nSet; i++) {
-						msg = (String) ois.readObject();
-						Object retorno = ado.set(msg, oos, ois);
-						oos.writeObject(retorno); 
-					}
-				} else if (msg != null && msg.equals("GET")) {
-					int nGet = (Integer) ois.readObject();
-					for (int i = 0; i < nGet; i++) {
-						msg = (String) ois.readObject();
-						Object retorno = ado.get(msg, oos, ois);
-						oos.writeObject(retorno); 
-					}
-				} else if (msg != null && msg.equals("DEL")) {
-					int nDel = (Integer) ois.readObject();
-					for (int i = 0; i < nDel; i++) {
-						msg = (String) ois.readObject();
-						Object retorno = ado.del(msg, oos, ois);
-						oos.writeObject(retorno); 
-					}
-				} else if (msg != null && msg.equals("ADD")) {
-					int nDel = (Integer) ois.readObject();
-					for (int i = 0; i < nDel; i++) {
-						msg = (String) ois.readObject();
-						Object retorno = ado.add(msg, oos, ois);
-						oos.writeObject(retorno); 
-					}
-				
-//				} else if (msg != null && msg.equals("FECHAPORTA")){
-//					msg = null;
-				} else {
-					msg = null;
-				}
+			Object obj = ois.readObject();
+			if (obj instanceof String) {
+				msg = (String) obj;
+			} else {
+				msg = null;
+				System.out.println("ERRO AO PEGAR COMANDO GET, SET, ADD ou DEL");
 			}
+			System.out.print("Requisição na porta " + porta + ": " + msg);
+			if (msg != null && msg.equals("SET")) {
+				msg = (String) ois.readObject();
+				System.out.println(" " + msg);
+				Object retorno = ado.set(msg, oos, ois);
+				oos.writeObject(retorno); 
+				
+			} else if (msg != null && msg.equals("GET")) {
+					Object objeto = ois.readObject();
+					System.out.println(" " + objeto);
+					msg = (String) objeto;
+					Object retorno = ado.get(msg, oos, ois);
+					oos.writeObject(retorno); 
+
+			} else if (msg != null && msg.equals("DEL")) {
+					msg = (String) ois.readObject();
+					System.out.println(" " + msg);
+					Object retorno = ado.del(msg, oos, ois);
+					oos.writeObject(retorno); 
+
+			} else if (msg != null && msg.equals("ADD")) {
+					msg = (String) ois.readObject();
+					System.out.println(" " + msg);
+					Object retorno = ado.add(msg, oos, ois);
+					oos.writeObject(retorno); 
+			}
+			
 			Servidor_main.liberadaPorta(porta);
-			System.out.println("Coneccao: Porta " + porta + " liberada");
+			
 		} catch (Exception e) {
-//			System.out.println(e.toString());
-			if (!e.toString().contains("EOF"))
 				e.printStackTrace();
 		}
 	}
-	
 }
