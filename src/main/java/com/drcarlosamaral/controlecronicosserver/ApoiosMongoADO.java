@@ -14,6 +14,7 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.PrintWriter;
 import java.io.StringWriter;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Date;
@@ -121,6 +122,8 @@ public class ApoiosMongoADO {
 	    		return getControleDm(oos,ois);
 	    	} else if (msg.equals("controleGest")) {
 	    		return getControleGest(oos,ois);
+	    	} else if (msg.equals("controleSm")) {
+	    		return getControleSm(oos,ois);
 	    	} else {
 	    		return new Document();
 	    	}
@@ -261,6 +264,10 @@ public class ApoiosMongoADO {
 	    		Document controleGest = (Document) ois.readObject();
 	    		return addControleGest(controleGest);
 	    	} else
+	    	if (msg.equals("controleSm")) {
+	    		Document controleSm = (Document) ois.readObject();
+	    		return addControleSm(controleSm);
+	    	} else
 	    	if (msg.equals("gestacao")) {
 	    		Document gestacao = (Document) ois.readObject();
 	    		return addGestacao(gestacao);
@@ -305,6 +312,10 @@ public class ApoiosMongoADO {
 	    	if (msg.equals("controleGest")) {
 	    		Document cGest = (Document) ois.readObject();
 	    		return setControleGest(cGest);
+	    	} else
+	    	if (msg.equals("controleSm")) {
+	    		Document cSm = (Document) ois.readObject();
+	    		return setControleSm(cSm);
 	    	} else
 	    	if (msg.equals("gestacao")) {
 	    		Document gestacao = (Document) ois.readObject();
@@ -618,6 +629,24 @@ public class ApoiosMongoADO {
 		}
     	return doc;
     }
+
+    private  Document getControleSm(ObjectOutputStream oos, ObjectInputStream ois) {
+    	Document doc = new Document();
+    	// vai passar o que?
+    	try {
+			String resposta = (String) ois.readObject();
+			if (resposta.equals("ObjectId")) {
+				ObjectId oId = (ObjectId) ois.readObject();
+				return getControleSm(oId);
+			} else if (resposta.equals("PacienteId")) {
+				ObjectId PacienteId = (ObjectId) ois.readObject();
+				return getControleSmByPacienteId(PacienteId);
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+    	return doc;
+    }
     
     private  ObjectId addControleHas(Document controleHas) {
     	MongoClientURI connectionString = new MongoClientURI(Login.getURL());
@@ -655,6 +684,20 @@ public class ApoiosMongoADO {
     	} catch (Exception e){
     		e.printStackTrace();
     		arquivaErro("Erro em ApoiosMongoADO.addControleGest(Document)", e);
+    	}
+    	return null;
+    }
+
+    private  ObjectId addControleSm(Document controleSm) {
+    	MongoClientURI connectionString = new MongoClientURI(Login.getURL());
+    	try (MongoClient mongoClient = new MongoClient(connectionString)){
+    		MongoDatabase mongoDB = mongoClient.getDatabase(Login.bd);
+    		MongoCollection<Document> collection = mongoDB.getCollection("SaudeDaMulher");
+    		collection.insertOne(controleSm);
+    		return controleSm.getObjectId("_id");
+    	} catch (Exception e){
+    		e.printStackTrace();
+    		arquivaErro("Erro em ApoiosMongoADO.addControleSm(Document)", e);
     	}
     	return null;
     }
@@ -746,6 +789,21 @@ public class ApoiosMongoADO {
     	}
     	return false;
     }
+
+    private  Boolean setControleSm(Document cSm) {
+    	MongoClientURI connectionString = new MongoClientURI(Login.getURL());
+    	try (MongoClient mongoClient = new MongoClient(connectionString)){
+    		MongoDatabase mongoDB = mongoClient.getDatabase(Login.bd);
+    		MongoCollection<Document> collection = mongoDB.getCollection("SaudeDaMulher");
+    		Document d = collection.findOneAndReplace(eq("_id", cSm.getObjectId("_id")), cSm);
+    		if (d != null) return true;
+    	} catch (Exception e){
+    		e.printStackTrace();
+    		arquivaErro("Erro em ApoiosMongoADO.setControleSm()", e);
+    	}
+    	return false;
+    }
+    
     private  Boolean setGestacao(Document gestacao) {
     	MongoClientURI connectionString = new MongoClientURI(Login.getURL());
     	try (MongoClient mongoClient = new MongoClient(connectionString)){
@@ -1113,18 +1171,6 @@ public class ApoiosMongoADO {
     	return doc;
     }
     
-    private  Document getControleHasByPacienteId(ObjectId paciente_id) {
-    	Document doc = new Document();
-    	MongoClientURI connectionString = new MongoClientURI(Login.getURL());
-    	try (MongoClient mongoClient = new MongoClient(connectionString)){
-    		MongoDatabase mongoDB = mongoClient.getDatabase(Login.bd);
-    		MongoCollection<Document> collection = mongoDB.getCollection("HAS");
-    		doc = collection.find(eq("paciente_id", paciente_id)).first();
-    	} catch (Exception e){
-    		arquivaErro("Erro em ApoiosMongoADO.getControleHasByPacienteId(_id)", e);
-    	}
-    	return doc;
-    }
 
     private  Document getControleDm(ObjectId _id) {
     	Document doc = new Document();
@@ -1152,6 +1198,37 @@ public class ApoiosMongoADO {
     	return doc;
     }
 
+    private  Document getControleSm(ObjectId _id) {
+    	Document doc = new Document();
+    	MongoClientURI connectionString = new MongoClientURI(Login.getURL());
+    	try (MongoClient mongoClient = new MongoClient(connectionString)){
+    		MongoDatabase mongoDB = mongoClient.getDatabase(Login.bd);
+    		MongoCollection<Document> collection = mongoDB.getCollection("SaudeDaMulher");
+    		doc = collection.find(eq("_id", _id)).first();
+    	} catch (Exception e){
+    		arquivaErro("Erro em ApoiosMongoADO.getControleSm(_id)", e);
+    	}
+    	return doc;
+    }
+    
+    private  Document getControleHasByPacienteId(ObjectId paciente_id) {
+    	Document doc = new Document();
+    	MongoClientURI connectionString = new MongoClientURI(Login.getURL());
+    	try (MongoClient mongoClient = new MongoClient(connectionString)){
+    		MongoDatabase mongoDB = mongoClient.getDatabase(Login.bd);
+    		MongoCollection<Document> collection = mongoDB.getCollection("HAS");
+    		doc = collection.find(eq("paciente_id", paciente_id)).first();
+        	if (doc == null) {
+        		doc = new Document("paciente_id", paciente_id);
+        		doc.append("DataInscricao", DateUtils.asDate(LocalDate.now()));
+        		collection.insertOne(doc);
+        	}
+    	} catch (Exception e){
+    		arquivaErro("Erro em ApoiosMongoADO.getControleHasByPacienteId(_id)", e);
+    	}
+    	return doc;
+    }
+    
     private  Document getControleDmByPacienteId(ObjectId paciente_id) {
     	Document doc = new Document();
     	MongoClientURI connectionString = new MongoClientURI(Login.getURL());
@@ -1159,6 +1236,11 @@ public class ApoiosMongoADO {
     		MongoDatabase mongoDB = mongoClient.getDatabase(Login.bd);
     		MongoCollection<Document> collection = mongoDB.getCollection("DM");
     		doc = collection.find(eq("paciente_id", paciente_id)).first();
+        	if (doc == null) {
+        		doc = new Document("paciente_id", paciente_id);
+        		doc.append("DataInscricao", DateUtils.asDate(LocalDate.now()));
+        		collection.insertOne(doc);
+        	}
     	} catch (Exception e){
     		e.printStackTrace();
     		arquivaErro("Erro em ApoiosMongoADO.getControleDmByPacienteId(_id)", e);
@@ -1173,9 +1255,33 @@ public class ApoiosMongoADO {
     		MongoDatabase mongoDB = mongoClient.getDatabase(Login.bd);
     		MongoCollection<Document> collection = mongoDB.getCollection("ControleGest");
     		doc = collection.find(eq("paciente_id", paciente_id)).first();
+        	if (doc == null) {
+        		doc = new Document("paciente_id", paciente_id);
+        		doc.append("DataInscricao", DateUtils.asDate(LocalDate.now()));
+        		collection.insertOne(doc);
+        	}
     	} catch (Exception e){
     		e.printStackTrace();
     		arquivaErro("Erro em ApoiosMongoADO.getControleGestByPacienteId(_id)", e);
+    	}
+    	return doc;
+    }
+
+    private  Document getControleSmByPacienteId(ObjectId paciente_id) {
+    	Document doc = new Document();
+    	MongoClientURI connectionString = new MongoClientURI(Login.getURL());
+    	try (MongoClient mongoClient = new MongoClient(connectionString)){
+    		MongoDatabase mongoDB = mongoClient.getDatabase(Login.bd);
+    		MongoCollection<Document> collection = mongoDB.getCollection("SaudeDaMulher");
+    		doc = collection.find(eq("paciente_id", paciente_id)).first();
+        	if (doc == null) {
+        		doc = new Document("paciente_id", paciente_id);
+        		doc.append("DataInscricao", DateUtils.asDate(LocalDate.now()));
+        		collection.insertOne(doc);
+        	}
+    	} catch (Exception e){
+    		e.printStackTrace();
+    		arquivaErro("Erro em ApoiosMongoADO.getControleSmByPacienteId(_id)", e);
     	}
     	return doc;
     }
