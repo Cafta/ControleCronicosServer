@@ -703,15 +703,19 @@ public class ApoiosMongoADO {
     }
     
     private  ObjectId addGestacao(Document gestacao) {
+    	if (gestacao.containsKey("_id") && gestacao.get("_id") == null) {
+    		gestacao.remove("_id"); 
+    	}
     	MongoClientURI connectionString = new MongoClientURI(Login.getURL());
     	try (MongoClient mongoClient = new MongoClient(connectionString)){
     		MongoDatabase mongoDB = mongoClient.getDatabase(Login.bd);
     		MongoCollection<Document> collection = mongoDB.getCollection("Gestacoes");
     		collection.insertOne(gestacao);
+    		System.out.println("Acaba de anexar nova gestacao. _id = " + gestacao.getObjectId("_id"));
     		return gestacao.getObjectId("_id");
     	} catch (Exception e){
     		e.printStackTrace();
-    		arquivaErro("Erro em ApoiosMongoADO.addControleDm(Document)", e);
+    		arquivaErro("Erro em ApoiosMongoADO.addGestacao(Document)", e);
     	}
     	return null;
     }
