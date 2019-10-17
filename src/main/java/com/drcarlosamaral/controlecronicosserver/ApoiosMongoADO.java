@@ -29,6 +29,10 @@ import com.mongodb.client.DistinctIterable;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoCursor;
 import com.mongodb.client.MongoDatabase;
+
+import javafx.beans.property.BooleanProperty;
+import javafx.beans.property.SimpleBooleanProperty;
+
 import static com.mongodb.client.model.Filters.*;
 
 /**
@@ -122,6 +126,8 @@ public class ApoiosMongoADO {
 	    		return getControleDm(oos,ois);
 	    	} else if (msg.equals("controleGest")) {
 	    		return getControleGest(oos,ois);
+	    	} else if (msg.equals("controleComAlarmesAtivos")) {
+	    		return getControleComAlarmesAtivos(oos,ois);
 	    	} else if (msg.equals("controleSm")) {
 	    		return getControleSm(oos,ois);
 	    	} else {
@@ -623,6 +629,9 @@ public class ApoiosMongoADO {
 			} else if (resposta.equals("PacienteId")) {
 				ObjectId PacienteId = (ObjectId) ois.readObject();
 				return getControleGestByPacienteId(PacienteId);
+			} else if (resposta.equals("GestacaoId")) {
+				ObjectId gestacaoId = (ObjectId) ois.readObject();
+				return getControleGestByGestacaoId(gestacaoId);
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -718,6 +727,38 @@ public class ApoiosMongoADO {
     		arquivaErro("Erro em ApoiosMongoADO.addGestacao(Document)", e);
     	}
     	return null;
+    }
+
+    private List<Document> getControleComAlarmesAtivos(ObjectOutputStream oos, ObjectInputStream ois) {
+    	List<Document> lista = new ArrayList<Document>();
+    	// Controle do quê?
+    	try {
+			String resposta = (String) ois.readObject();
+			if (resposta.equals("gestacao")) {
+				return getControlesAtivados("ControleGest");
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+    	return lista;
+    }
+    
+    private List<Document> getControlesAtivados(String collection) {
+    	List<Document> lista = new ArrayList<Document>();
+    	Date now = DateUtils.asDate(LocalDate.now());
+    	MongoClientURI connectionString = new MongoClientURI(Login.getURL());
+    	try (MongoClient mongoClient = new MongoClient(connectionString)){
+    		MongoDatabase mongoDB = mongoClient.getDatabase(Login.bd);
+    		MongoCollection<Document> mongoCollection = mongoDB.getCollection(collection);
+    		
+    		MongoCursor<Document> cursor = mongoCollection.find(and(exists("alarmes", true), lt("alarmes.data", now))).iterator();
+    		cursor.forEachRemaining(controle -> {
+    			lista.add(controle);
+    		});
+    	} catch (Exception e){
+    		arquivaErro("Erro em ApoiosMongoADO.getControlesAtivados(String collection)", e);
+    	}
+    	return lista;
     }
     
     private  ObjectId addEndereco(Document endereco) {
@@ -1267,6 +1308,23 @@ public class ApoiosMongoADO {
     	} catch (Exception e){
     		e.printStackTrace();
     		arquivaErro("Erro em ApoiosMongoADO.getControleGestByPacienteId(_id)", e);
+    	}
+    	return doc;
+    }
+
+    private  Document getControleGestByGestacaoId(ObjectId gestacaoId) {
+    	Document doc = new Document();
+    	MongoClientURI connectionString = new MongoClientURI(Login.getURL());
+    	try (MongoClient mongoClient = new MongoClient(connectionString)){
+    		MongoDatabase mongoDB = mongoClient.getDatabase(Login.bd);
+    		MongoCollection<Document> collection = mongoDB.getCollection("ControleGest");
+    		doc = collection.find(eq("gestacaoAtualId", gestacaoId)).first();
+        	if (doc == null) {
+        		return null;
+        	}
+    	} catch (Exception e){
+    		e.printStackTrace();
+    		arquivaErro("Erro em ApoiosMongoADO.getControleGestByGestacaoId(gestacaoId)", e);
     	}
     	return doc;
     }
