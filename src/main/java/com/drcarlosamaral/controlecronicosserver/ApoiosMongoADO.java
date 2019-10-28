@@ -570,6 +570,8 @@ public class ApoiosMongoADO {
     }
     
     private  ObjectId addPaciente(Document paciente) {
+    	if (paciente == null) return null;
+    	if (paciente.getDouble("cns") == 0) return null;
     	MongoClientURI connectionString = new MongoClientURI(Login.getURL());
     	try (MongoClient mongoClient = new MongoClient(connectionString)){
     		MongoDatabase mongoDB = mongoClient.getDatabase(Login.bd);
@@ -902,6 +904,7 @@ public class ApoiosMongoADO {
     	return doc;
     }
     private  ObjectId addPessoa(Document pessoa) {
+    	if (pessoa == null) return null;
     	MongoClientURI connectionString = new MongoClientURI(Login.getURL());
     	try (MongoClient mongoClient = new MongoClient(connectionString)){
     		MongoDatabase mongoDB = mongoClient.getDatabase(Login.bd);
