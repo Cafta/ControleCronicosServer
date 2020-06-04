@@ -25,9 +25,10 @@ import org.bson.Document;
 public class Login {
     private static String name;
     //private static String URL = "mongodb://Admin:hehehe@172.22.74.41:27017";
+    //private static String URL = "mongodb://cafta:tafca06@localhost:27017";
     private static String URL = "mongodb://usuario:xyz123@localhost:27017";
     public static final String bd = "ControleCronicosBD";//"ControleCronicosBD2";//"ControleNovaAmerica"; //"ControleCronicosBD";
-    public static final String VERSAO = "1.1.0 (void)";
+    public static final String VERSAO = "1.0.0 (START)";
     
     /**
      * Esquema de confirmação de log.

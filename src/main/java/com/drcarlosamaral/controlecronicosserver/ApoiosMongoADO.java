@@ -84,6 +84,132 @@ public class ApoiosMongoADO {
         }
         return false;
     }
+    
+    public Object add(String msg, ObjectOutputStream oos, ObjectInputStream ois) {
+    	try {
+	    	if (msg.equals("receita")) {
+	    		Document receita = (Document) ois.readObject();
+	    		return addReceita(receita);
+	    	} else
+	    	if (msg.equals("pessoa")) {
+	    		Document pessoa = (Document) ois.readObject();
+	    		return addPessoa(pessoa);
+	    	} else
+	    	if (msg.equals("consulta")) {
+	    		Document consulta = (Document) ois.readObject();
+	    		return addConsulta(consulta);
+	    	} else
+	    	if (msg.equals("impresso")) {
+	    		Document impresso = (Document) ois.readObject();
+	    		return addImpresso(impresso);
+	    	} else
+	    	if (msg.equals("exame")) {
+	    		Document exame = (Document) ois.readObject();
+	    		return addExame(exame);
+	    	} else
+	    	if (msg.equals("funcionario")) {
+	    		Document funcionario = (Document) ois.readObject();
+	    		return addFuncionario(funcionario);
+	    	} else 
+	    	if (msg.equals("paciente")) {
+	    		Document paciente = (Document) ois.readObject();
+	    		return addPaciente(paciente);
+	    	} else
+	    	if (msg.equals("controleHas")) {
+	    		Document controleHas = (Document) ois.readObject();
+	    		return addControleHas(controleHas);
+	    	} else
+	    	if (msg.equals("controleDm")) {
+	    		Document controleDm = (Document) ois.readObject();
+	    		return addControleDm(controleDm);
+	    	} else
+	    	if (msg.equals("controleGest")) {
+	    		Document controleGest = (Document) ois.readObject();
+	    		return addControleGest(controleGest);
+	    	} else
+	    	if (msg.equals("controleSm")) {
+	    		Document controleSm = (Document) ois.readObject();
+	    		return addControleSm(controleSm);
+	    	} else
+	    	if (msg.equals("gestacao")) {
+	    		Document gestacao = (Document) ois.readObject();
+	    		return addGestacao(gestacao);
+	    	} else
+	    	if (msg.equals("endereco")) {
+	    		Document endereco = (Document) ois.readObject();
+	    		return addEndereco(endereco);
+	    	} else
+	    	if (msg.equals("arquivo")) {
+	    		Document arquivo = (Document) ois.readObject();
+	    		return addArquivo(arquivo);
+	    	}
+	    	return false;
+    	} catch (Exception e) {
+    		e.printStackTrace();
+    		return new Document();
+    	}
+    }
+    
+    public Object set(String msg, ObjectOutputStream oos, ObjectInputStream ois) {
+    	try {
+	    	if (msg.equals("receita")) {
+	    		Document receita = (Document) ois.readObject();
+	    		return setReceita(receita);
+	    	} else
+	    	if (msg.equals("pessoa")) {
+	    		Document pessoa = (Document) ois.readObject();
+	    		return setPessoa(pessoa);
+	    	} else
+	    	if (msg.equals("paciente")) {
+	    		Document paciente = (Document) ois.readObject();
+	    		return setPaciente(paciente);
+	    	} else
+	    	if (msg.equals("controleHas")) {
+	    		Document has = (Document) ois.readObject();
+	    		return setControleHas(has);
+	    	} else
+	    	if (msg.equals("controleDm")) {
+	    		Document dm = (Document) ois.readObject();
+	    		return setControleDm(dm);
+	    	} else
+	    	if (msg.equals("controleGest")) {
+	    		Document cGest = (Document) ois.readObject();
+	    		return setControleGest(cGest);
+	    	} else
+	    	if (msg.equals("controleSm")) {
+	    		Document cSm = (Document) ois.readObject();
+	    		return setControleSm(cSm);
+	    	} else
+	    	if (msg.equals("gestacao")) {
+	    		Document gestacao = (Document) ois.readObject();
+	    		return setGestacao(gestacao);
+	    	} else
+	    	if (msg.equals("impresso")) {
+	    		Document impresso = (Document) ois.readObject();
+	    		return setImpresso(impresso);
+	    	} else 
+	    	if (msg.equals("exame")) {
+	    		Document exame = (Document) ois.readObject();
+	    		return setExame(exame);
+	    	} else
+	    	if (msg.equals("funcionario")) {
+	    		Document funcionario = (Document) ois.readObject();
+	    		return setFuncionario(funcionario);
+	    	} else
+	    	if (msg.equals("consulta")) {
+	    		Document consulta = (Document) ois.readObject();
+	    		return setConsulta(consulta);
+	    	} else
+	    	if (msg.equals("endereco")) {
+	    		Document endereco = (Document) ois.readObject();
+	    		return setEndereco(endereco);
+	    	}
+	    	return false;
+    	} catch (Exception e) {
+    		e.printStackTrace();
+    		return new Document();
+    	}
+    }
 
     public Object get(String msg, ObjectOutputStream oos, ObjectInputStream ois) {
     	try {
@@ -225,132 +351,6 @@ public class ApoiosMongoADO {
     	} catch (Exception e) {
     		e.printStackTrace();
     		return false;
-    	}
-    }
-    
-    public Object add(String msg, ObjectOutputStream oos, ObjectInputStream ois) {
-    	try {
-	    	if (msg.equals("receita")) {
-	    		Document receita = (Document) ois.readObject();
-	    		return addReceita(receita);
-	    	} else
-	    	if (msg.equals("pessoa")) {
-	    		Document pessoa = (Document) ois.readObject();
-	    		return addPessoa(pessoa);
-	    	} else
-	    	if (msg.equals("consulta")) {
-	    		Document consulta = (Document) ois.readObject();
-	    		return addConsulta(consulta);
-	    	} else
-	    	if (msg.equals("impresso")) {
-	    		Document impresso = (Document) ois.readObject();
-	    		return addImpresso(impresso);
-	    	} else
-	    	if (msg.equals("exame")) {
-	    		Document exame = (Document) ois.readObject();
-	    		return addExame(exame);
-	    	} else
-	    	if (msg.equals("funcionario")) {
-	    		Document funcionario = (Document) ois.readObject();
-	    		return addFuncionario(funcionario);
-	    	} else 
-	    	if (msg.equals("paciente")) {
-	    		Document paciente = (Document) ois.readObject();
-	    		return addPaciente(paciente);
-	    	} else
-	    	if (msg.equals("controleHas")) {
-	    		Document controleHas = (Document) ois.readObject();
-	    		return addControleHas(controleHas);
-	    	} else
-	    	if (msg.equals("controleDm")) {
-	    		Document controleDm = (Document) ois.readObject();
-	    		return addControleDm(controleDm);
-	    	} else
-	    	if (msg.equals("controleGest")) {
-	    		Document controleGest = (Document) ois.readObject();
-	    		return addControleGest(controleGest);
-	    	} else
-	    	if (msg.equals("controleSm")) {
-	    		Document controleSm = (Document) ois.readObject();
-	    		return addControleSm(controleSm);
-	    	} else
-	    	if (msg.equals("gestacao")) {
-	    		Document gestacao = (Document) ois.readObject();
-	    		return addGestacao(gestacao);
-	    	} else
-	    	if (msg.equals("endereco")) {
-	    		Document endereco = (Document) ois.readObject();
-	    		return addEndereco(endereco);
-	    	} else
-	    	if (msg.equals("arquivo")) {
-	    		Document arquivo = (Document) ois.readObject();
-	    		return addArquivo(arquivo);
-	    	}
-	    	return false;
-    	} catch (Exception e) {
-    		e.printStackTrace();
-    		return new Document();
-    	}
-    }
-    
-    public Object set(String msg, ObjectOutputStream oos, ObjectInputStream ois) {
-    	try {
-	    	if (msg.equals("receita")) {
-	    		Document receita = (Document) ois.readObject();
-	    		return setReceita(receita);
-	    	} else
-	    	if (msg.equals("pessoa")) {
-	    		Document pessoa = (Document) ois.readObject();
-	    		return setPessoa(pessoa);
-	    	} else
-	    	if (msg.equals("paciente")) {
-	    		Document paciente = (Document) ois.readObject();
-	    		return setPaciente(paciente);
-	    	} else
-	    	if (msg.equals("controleHas")) {
-	    		Document has = (Document) ois.readObject();
-	    		return setControleHas(has);
-	    	} else
-	    	if (msg.equals("controleDm")) {
-	    		Document dm = (Document) ois.readObject();
-	    		return setControleDm(dm);
-	    	} else
-	    	if (msg.equals("controleGest")) {
-	    		Document cGest = (Document) ois.readObject();
-	    		return setControleGest(cGest);
-	    	} else
-	    	if (msg.equals("controleSm")) {
-	    		Document cSm = (Document) ois.readObject();
-	    		return setControleSm(cSm);
-	    	} else
-	    	if (msg.equals("gestacao")) {
-	    		Document gestacao = (Document) ois.readObject();
-	    		return setGestacao(gestacao);
-	    	} else
-	    	if (msg.equals("impresso")) {
-	    		Document impresso = (Document) ois.readObject();
-	    		return setImpresso(impresso);
-	    	} else 
-	    	if (msg.equals("exame")) {
-	    		Document exame = (Document) ois.readObject();
-	    		return setExame(exame);
-	    	} else
-	    	if (msg.equals("funcionario")) {
-	    		Document funcionario = (Document) ois.readObject();
-	    		return setFuncionario(funcionario);
-	    	} else
-	    	if (msg.equals("consulta")) {
-	    		Document consulta = (Document) ois.readObject();
-	    		return setConsulta(consulta);
-	    	} else
-	    	if (msg.equals("endereco")) {
-	    		Document endereco = (Document) ois.readObject();
-	    		return setEndereco(endereco);
-	    	}
-	    	return false;
-    	} catch (Exception e) {
-    		e.printStackTrace();
-    		return new Document();
     	}
     }
     
@@ -569,15 +569,20 @@ public class ApoiosMongoADO {
     	return doc;
     }
     
-    private  ObjectId addPaciente(Document paciente) {
+    private ObjectId addPaciente(Document paciente) {
+    	System.out.println("tentando adicionar paciente");
     	if (paciente == null) return null;
-    	if (paciente.getDouble("cns") == 0) return null;
+    	System.out.println("O documento (paciente) passado para adição não é nulo.");
+    	if (paciente.getLong("cns") != null && paciente.getLong("cns").equals(0)) paciente.remove("cns");
+    	System.out.println("a CNS desse paciente passado ficou igual a: " + (paciente.containsKey("cns")? "não nulo": "nulo"));
     	MongoClientURI connectionString = new MongoClientURI(Login.getURL());
     	try (MongoClient mongoClient = new MongoClient(connectionString)){
     		MongoDatabase mongoDB = mongoClient.getDatabase(Login.bd);
     		MongoCollection<Document> collection = mongoDB.getCollection("Pacientes");
     		collection.insertOne(paciente);
-    		return paciente.getObjectId("_id");
+    		ObjectId oid = paciente.getObjectId("_id");
+    		System.out.println("Vai retornar o objectId: " + oid.toString());
+    		return oid;
     	} catch (Exception e){
     		arquivaErro("Erro em ApoiosMongoADO.addPaciente(paciente)", e);
     	}
@@ -1351,16 +1356,19 @@ public class ApoiosMongoADO {
     	return doc;
     }
     
-    private  String getVersion() {
+    private String getVersion() {
     	MongoClientURI connectionString = new MongoClientURI(Login.getURL());
     	try (MongoClient mongoClient = new MongoClient(connectionString)){
     		MongoDatabase mongoDB = mongoClient.getDatabase(Login.bd);
-    		MongoCollection<Document> collection = mongoDB.getCollection("Funcionarios");
+    		MongoCollection<Document> collection = mongoDB.getCollection("Config");
     		Document doc = collection.find(exists("versao")).first();
     		if (doc != null && !doc.isEmpty()) {
     			return doc.getString("versao");
     		} else {
-    			return "sem versao definida1";
+    			doc = new Document();
+    			doc.append("versao", Login.VERSAO);
+    			collection.insertOne(doc);
+    			return Login.VERSAO;
     		}
     	} catch (Exception e){
     		arquivaErro("Erro em ApoiosMongoADO.getVersion()", e);
