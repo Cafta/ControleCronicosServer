@@ -278,6 +278,12 @@ public class ApoiosMongoADO {
     			return getListaMedicos();
     		} else if (oque.equals("alias")) {
     			return getListaAlias();
+    		} else if (oque.equals("controlesGestByPacienteId")) {
+    			ObjectId pacienteId = (ObjectId) ois.readObject();
+    			return getListaControlesGestByPacienteId(pacienteId);
+    		} else if (oque.equals("GestByPacienteId")) {
+    			ObjectId pacienteId = (ObjectId) ois.readObject();
+    			return getListaGestByPacienteId(pacienteId);
     		} else if (oque.equals("consultas")) {
     			String passandoOQue = (String) ois.readObject();
     			if (passandoOQue.equals("paciente_id")) {
@@ -624,7 +630,7 @@ public class ApoiosMongoADO {
 		}
     	return doc;
     }
-
+    
     private  Document getControleGest(ObjectOutputStream oos, ObjectInputStream ois) {
     	Document doc = new Document();
     	// vai passar o que?
@@ -633,9 +639,6 @@ public class ApoiosMongoADO {
 			if (resposta.equals("ObjectId")) {
 				ObjectId oId = (ObjectId) ois.readObject();
 				return getControleGest(oId);
-			} else if (resposta.equals("PacienteId")) {
-				ObjectId PacienteId = (ObjectId) ois.readObject();
-				return getControleGestByPacienteId(PacienteId);
 			} else if (resposta.equals("GestacaoId")) {
 				ObjectId gestacaoId = (ObjectId) ois.readObject();
 				return getControleGestByGestacaoId(gestacaoId);
@@ -645,6 +648,7 @@ public class ApoiosMongoADO {
 		}
     	return doc;
     }
+
 
     private  Document getControleSm(ObjectOutputStream oos, ObjectInputStream ois) {
     	Document doc = new Document();
@@ -1207,6 +1211,38 @@ public class ApoiosMongoADO {
     		}
     	} catch (Exception e) {
     		arquivaErro("Erro em ApoiosMongoADO.getListaDeExames(Object_id paciente_id)", e);
+    	}
+    	return docs;
+    }
+
+    private  List<Document> getListaControlesGestByPacienteId(ObjectId paciente_id) {
+    	List<Document> docs = new ArrayList<Document>();
+    	MongoClientURI connectionString = new MongoClientURI(Login.getURL());
+    	try (MongoClient mongoClient = new MongoClient(connectionString)){
+    		MongoDatabase mongoDB = mongoClient.getDatabase(Login.bd);
+    		MongoCollection<Document> collection = mongoDB.getCollection("ControleGest");
+    		MongoCursor<Document> cursor = collection.find(eq("paciente_id", paciente_id)).iterator();
+    		while (cursor.hasNext()) {
+    			docs.add(cursor.next());
+    		}
+    	} catch (Exception e){
+    		arquivaErro("Erro em ApoiosMongoADO.getListaControlesGestByPacienteId(pacienteId)", e);
+    	}
+    	return docs;
+    }
+    
+    private  List<Document> getListaGestByPacienteId(ObjectId paciente_id) {
+    	List<Document> docs = new ArrayList<Document>();
+    	MongoClientURI connectionString = new MongoClientURI(Login.getURL());
+    	try (MongoClient mongoClient = new MongoClient(connectionString)){
+    		MongoDatabase mongoDB = mongoClient.getDatabase(Login.bd);
+    		MongoCollection<Document> collection = mongoDB.getCollection("Gestacoes");
+    		MongoCursor<Document> cursor = collection.find(eq("paciente_id", paciente_id)).iterator();
+    		while (cursor.hasNext()) {
+    			docs.add(cursor.next());
+    		}
+    	} catch (Exception e){
+    		arquivaErro("Erro em ApoiosMongoADO.getListaControlesGestByPacienteId(pacienteId)", e);
     	}
     	return docs;
     }
