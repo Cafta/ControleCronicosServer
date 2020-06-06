@@ -214,7 +214,7 @@ public class ApoiosMongoADO {
     public Object get(String msg, ObjectOutputStream oos, ObjectInputStream ois) {
     	try {
 	    	if (msg.equals("versao")) {
-	    		return getVersion();
+	    		return Login.VERSAO;
 	    	} else if (msg.equals("lista")) {
 	    		return getLista(oos,ois);
 	    	} else if (msg.equals("listaPessoas")) {
@@ -1392,6 +1392,7 @@ public class ApoiosMongoADO {
     	return doc;
     }
     
+    /*
     private String getVersion() {
     	MongoClientURI connectionString = new MongoClientURI(Login.getURL());
     	try (MongoClient mongoClient = new MongoClient(connectionString)){
@@ -1411,6 +1412,7 @@ public class ApoiosMongoADO {
     	}
     	return "sem versao definida2";
     }
+    */
     
     private  Object getDadosUsuario(ObjectOutputStream oos, ObjectInputStream ois) {
     	try {

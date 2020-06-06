@@ -28,7 +28,7 @@ public class Login {
     //private static String URL = "mongodb://cafta:tafca06@localhost:27017";
     private static String URL = "mongodb://usuario:xyz123@localhost:27017";
     public static final String bd = "ControleCronicosBD";//"ControleCronicosBD2";//"ControleNovaAmerica"; //"ControleCronicosBD";
-    public static final String VERSAO = "1.0.0 (START)";
+    public static final String VERSAO = "1.1.0 (Bebê)";
     
     /**
      * Esquema de confirmação de log.
