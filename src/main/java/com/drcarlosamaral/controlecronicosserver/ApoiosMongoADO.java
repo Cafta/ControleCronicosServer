@@ -352,12 +352,37 @@ public class ApoiosMongoADO {
 	    		if (obj instanceof ObjectId) {
 	    			return delGestacao((ObjectId) obj);
 	    		}
+			} else if (msg.equals("pessoa")) {
+	    		Object obj = ois.readObject();
+	    		if (obj instanceof ObjectId) {
+	    			return delPessoa((ObjectId) obj);
+	    		}
 			}
 	    	return false;
     	} catch (Exception e) {
     		e.printStackTrace();
     		return false;
     	}
+    }
+    
+    private Boolean delPessoa(ObjectId pessoa_id) {
+    	/*
+    	 *  Aqui tem que seguir um algorítimo grande:
+    	 *  1) Pegar o pacienteId desta pessoa
+    	 *  2) Apagar a pessoa
+    	 *  3) Apagar o paciente
+    	 *  4) Apagar as gestações deste paciente
+    	 *  5) Apagar as receitas deste paciente
+    	 *  6) Apagar as consultas deste paciente
+    	 *  7) Apagar os controles deste paciente
+    	 *  8) Apagar os exames deste paciente
+    	 */
+    	Document pessoa = getPessoa(pessoa_id);
+    	delPessoa(pessoa_id);
+    	if (pessoa.getObjectId("paciente_id") != null) {
+    		
+    	}
+    	return false;
     }
     
     private Document getPessoa(ObjectOutputStream oos, ObjectInputStream ois) {
@@ -1734,6 +1759,7 @@ public class ApoiosMongoADO {
     public Boolean arquiva(Document document){
         try {
             if (document == null || document.isEmpty()) return false;
+            document.append("dataDoArquivamento", DateUtils.asDate(LocalDate.now()));
             MongoClientURI connectionString = new MongoClientURI(Login.getURL());
             try(MongoClient mongoClient = new MongoClient(connectionString)){
             	MongoDatabase database = mongoClient.getDatabase(Login.bd);

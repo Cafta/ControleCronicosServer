@@ -19,14 +19,14 @@ import java.util.Objects;
 import org.bson.Document;
 
 /**
- *
  * @author Dr.Carlos Amaral
  */
 public class Login {
     private static String name;
     //private static String URL = "mongodb://Admin:hehehe@172.22.74.41:27017";
     //private static String URL = "mongodb://cafta:tafca06@localhost:27017";
-    private static String URL = "mongodb://usuario:xyz123@localhost:27017";
+    //private static String URL = "mongodb://usuario:xyz123@localhost:27017";
+    private static String URL = "mongodb+srv://usuario:xyz123@controlecronicoscluster-qdsy7.gcp.mongodb.net/ControleCronicos?retryWrites=true&w=majority";
     public static final String bd = "ControleCronicosBD";//"ControleCronicosBD2";//"ControleNovaAmerica"; //"ControleCronicosBD";
     public static final String VERSAO = "1.1.0 (Bebê)";
     
